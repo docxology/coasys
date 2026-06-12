@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Coasys Ops</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/">Coasys Ops</a>
+      <nav class="nav">
+        <button class="nav-button" data-view="overview" title="Overview">Overview</button>
+        <button class="nav-button" data-view="repos" title="Repositories">Repos</button>
+        <button class="nav-button" data-view="runs" title="Runs">Runs</button>
+        <button class="nav-button" data-view="topology" title="Topology">Topology</button>
+      </nav>
+    </header>
+
+    <main>
+      <section id="overview" class="view active">
+        <div class="section-heading">
+          <h1>Repository Fleet</h1>
+          <div class="action-row">
+            <a class="button-link" href="/api/report" target="_blank" rel="noreferrer">Report</a>
+            <button id="operate-local">Operate Local</button>
+            <button id="operate-fleet">Sync + Validate</button>
+            <button id="refresh" class="primary-button">Refresh</button>
+          </div>
+        </div>
+        <div id="notice" class="notice" hidden></div>
+        <div id="summary" class="summary-grid"></div>
+        <div id="alerts" class="alerts"></div>
+      </section>
+
+      <section id="repos" class="view">
+        <div class="section-heading">
+          <h1>Repositories</h1>
+          <div class="filters">
+            <select id="tier-filter" aria-label="Tier filter">
+              <option value="">All tiers</option>
+            </select>
+            <select id="status-filter" aria-label="Status filter">
+              <option value="">All statuses</option>
+              <option value="passed">Passed</option>
+              <option value="warn">Warn</option>
+              <option value="failed">Failed</option>
+              <option value="blocked">Blocked</option>
+              <option value="missing">Missing</option>
+            </select>
+          </div>
+        </div>
+        <div id="repo-table" class="table-wrap"></div>
+      </section>
+
+      <section id="runs" class="view">
+        <div class="section-heading">
+          <h1>Runs</h1>
+        </div>
+        <div id="runs-table" class="table-wrap"></div>
+      </section>
+
+      <section id="topology" class="view">
+        <div class="section-heading">
+          <h1>Topology</h1>
+        </div>
+        <div id="topology-groups" class="topology-grid"></div>
+      </section>
+
+      <aside id="detail" class="detail-panel" aria-live="polite"></aside>
+    </main>
+
+    <script src="/static/app.js" type="module"></script>
+  </body>
+</html>

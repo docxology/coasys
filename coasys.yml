@@ -1,0 +1,233 @@
+org: coasys
+
+workspace:
+  repos_dir: workspace/repos
+  state_dir: workspace/state
+
+defaults:
+  timeout_seconds: 600
+  clone_protocol: https
+  clone_depth: 1
+  partial_clone: true
+  execute_detected_validation: false
+
+repos:
+  ad4m:
+    tier: core
+    timeout_seconds: 1200
+    playbooks:
+      validate:
+        commands:
+          - pnpm run lint
+        dry_run_commands:
+          - test -f package.json
+        automatic: false
+      build:
+        commands:
+          - pnpm run build-libs
+        dry_run_commands:
+          - test -f package.json
+      start:
+        commands:
+          - pnpm run serve
+        dry_run_commands:
+          - test -f package.json
+  we:
+    tier: core
+    timeout_seconds: 1200
+    playbooks:
+      validate:
+        commands:
+          - pnpm run validate:seed
+        dry_run_commands:
+          - test -f package.json
+        automatic: false
+      build:
+        commands:
+          - pnpm run build:web
+        dry_run_commands:
+          - test -f package.json
+      start:
+        commands:
+          - pnpm run dev:web
+        dry_run_commands:
+          - test -f package.json
+  perspect3ve:
+    tier: core
+    playbooks:
+      validate:
+        commands:
+          - pnpm run check
+        dry_run_commands:
+          - test -f package.json
+        automatic: false
+      build:
+        commands:
+          - pnpm run build
+        dry_run_commands:
+          - test -f package.json
+      start:
+        commands:
+          - pnpm run dev
+        dry_run_commands:
+          - test -f package.json
+  flux:
+    tier: core
+    timeout_seconds: 1200
+    playbooks:
+      validate:
+        commands:
+          - pnpm run typecheck
+        dry_run_commands:
+          - test -f package.json
+        automatic: false
+      build:
+        commands:
+          - pnpm run build
+        dry_run_commands:
+          - test -f package.json
+      start:
+        commands:
+          - pnpm run dev
+        dry_run_commands:
+          - test -f package.json
+      deploy:
+        commands:
+          - pnpm run publish:all
+        dry_run_commands:
+          - pnpm run publish:dry-run
+        env_required:
+          - NPM_TOKEN
+  ad4m-host:
+    tier: core
+    timeout_seconds: 1200
+    playbooks:
+      validate:
+        commands:
+          - npm run build
+        dry_run_commands:
+          - test -f package.json
+        automatic: false
+      build:
+        commands:
+          - npm run build
+        dry_run_commands:
+          - test -f package.json
+      start:
+        commands:
+          - npm run dev
+        dry_run_commands:
+          - test -f package.json
+  ad4m-devtools:
+    tier: core
+    playbooks:
+      validate:
+        commands:
+          - pnpm run test
+        dry_run_commands:
+          - test -f package.json
+        automatic: false
+      build:
+        commands:
+          - pnpm run build
+        dry_run_commands:
+          - test -f package.json
+      start:
+        commands:
+          - pnpm run dev
+        dry_run_commands:
+          - test -f package.json
+  ad4m-wind-tunnel:
+    tier: core
+    playbooks:
+      validate:
+        commands:
+          - npm run build
+        dry_run_commands:
+          - test -f package.json
+        automatic: false
+      build:
+        commands:
+          - npm run build
+        dry_run_commands:
+          - test -f package.json
+      start:
+        commands:
+          - npm run start
+        dry_run_commands:
+          - test -f package.json
+  paperclip:
+    tier: active
+    timeout_seconds: 1200
+    playbooks:
+      validate:
+        commands:
+          - pnpm run typecheck
+        dry_run_commands:
+          - test -f package.json
+        automatic: false
+      build:
+        commands:
+          - pnpm run build
+        dry_run_commands:
+          - test -f package.json
+      start:
+        commands:
+          - pnpm run dev
+        dry_run_commands:
+          - test -f package.json
+      deploy:
+        commands:
+          - pnpm run release
+        dry_run_commands:
+          - pnpm run release:preflight
+        env_required:
+          - GITHUB_TOKEN
+          - NPM_TOKEN
+  joining-service:
+    tier: active
+    playbooks:
+      validate:
+        commands:
+          - pnpm run typecheck
+        dry_run_commands:
+          - test -f package.json
+        automatic: false
+      build:
+        commands:
+          - pnpm run build
+        dry_run_commands:
+          - test -f package.json
+      start:
+        commands:
+          - pnpm run start
+        dry_run_commands:
+          - test -f package.json
+  social-dna:
+    tier: active
+    playbooks:
+      validate:
+        commands:
+          - npm run build
+        dry_run_commands:
+          - test -f package.json
+        automatic: false
+      build:
+        commands:
+          - npm run build
+        dry_run_commands:
+          - test -f package.json
+  zeroclaw:
+    tier: active
+    playbooks:
+      validate:
+        commands:
+          - cargo metadata --no-deps --format-version 1
+        dry_run_commands:
+          - test -f Cargo.toml
+        automatic: false
+      build:
+        commands:
+          - cargo build
+        dry_run_commands:
+          - test -f Cargo.toml

@@ -1,0 +1,12 @@
+/.venv/
+/.pytest_cache/
+/.ruff_cache/
+/htmlcov/
+/dist/
+/build/
+/workspace/
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+.DS_Store
