@@ -1,0 +1,170 @@
+/* ============================================================================
+ * WE design tokens for the Weave dashboard.
+ *
+ * Faithful reproduction of the coasys/we `@we/tokens` system
+ * (packages/design-system/1-tokens + 2-themes): the `--we-*` custom-property
+ * vocabulary, the dynamic HSL colour model (per-family hue + global
+ * saturation + lightness scale), and theme switching via `[data-we-theme]`.
+ *
+ * The dashboard's semantic variables (--bg, --ink, --accent, …) are remapped
+ * onto these tokens, so the whole UI — and the interactive topology — is
+ * styled by the real WE design language. Loaded AFTER styles.css so these
+ * declarations win.
+ * ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
+
+:root {
+  /* --- typography / space / shape (the @we/tokens scales) --------------- */
+  --we-font-family: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --we-font-size-300: 0.78rem;
+  --we-font-size-400: 0.88rem;
+  --we-font-size-500: 1rem;
+  --we-font-size-600: 1.25rem;
+  --we-font-size-700: 1.6rem;
+
+  --we-space-100: 0.25rem;
+  --we-space-200: 0.5rem;
+  --we-space-300: 0.75rem;
+  --we-space-400: 1rem;
+  --we-space-500: 1.5rem;
+  --we-space-600: 2rem;
+
+  --we-border-radius: 8px;
+  --we-border-radius-lg: 14px;
+  --we-border-radius-pill: 999px;
+  --we-depth-100: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --we-depth-200: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --we-depth-300: 0 12px 40px rgba(0, 0, 0, 0.16);
+  --we-transition-200: 0.16s ease;
+
+  /* --- dynamic colour model -------------------------------------------- */
+  /* Per-family hue, a global saturation, and a lightness scale. Colours are
+     composed as hsl(hue saturation lightness), exactly like @we/tokens. */
+  --we-color-primary-hue: 168; /* teal-green — the coasys accent */
+  --we-color-success-hue: 145;
+  --we-color-warning-hue: 38;
+  --we-color-danger-hue: 4;
+  --we-color-ui-hue: 205;
+  --we-color-saturation: 58%;
+  --we-color-neutral-saturation: 14%;
+
+  --we-color-lightness-25: 97%;
+  --we-color-lightness-50: 95%;
+  --we-color-lightness-100: 90%;
+  --we-color-lightness-200: 80%;
+  --we-color-lightness-300: 68%;
+  --we-color-lightness-400: 60%;
+  --we-color-lightness-500: 50%;
+  --we-color-lightness-600: 42%;
+  --we-color-lightness-700: 34%;
+  --we-color-lightness-800: 26%;
+  --we-color-lightness-900: 18%;
+  --we-color-lightness-1000: 9%;
+
+  --we-color-white: #ffffff;
+  --we-color-black: #0d0f0e;
+
+  /* Composed family tokens (only the steps the UI uses). */
+  --we-color-primary-50: hsl(var(--we-color-primary-hue) var(--we-color-saturation) var(--we-color-lightness-50));
+  --we-color-primary-100: hsl(var(--we-color-primary-hue) var(--we-color-saturation) var(--we-color-lightness-100));
+  --we-color-primary-400: hsl(var(--we-color-primary-hue) var(--we-color-saturation) var(--we-color-lightness-400));
+  --we-color-primary-500: hsl(var(--we-color-primary-hue) var(--we-color-saturation) var(--we-color-lightness-500));
+  --we-color-primary-600: hsl(var(--we-color-primary-hue) var(--we-color-saturation) var(--we-color-lightness-600));
+  --we-color-primary-700: hsl(var(--we-color-primary-hue) var(--we-color-saturation) var(--we-color-lightness-700));
+
+  --we-color-success-500: hsl(var(--we-color-success-hue) var(--we-color-saturation) var(--we-color-lightness-500));
+  --we-color-success-600: hsl(var(--we-color-success-hue) var(--we-color-saturation) var(--we-color-lightness-600));
+  --we-color-warning-500: hsl(var(--we-color-warning-hue) var(--we-color-saturation) var(--we-color-lightness-500));
+  --we-color-warning-700: hsl(var(--we-color-warning-hue) var(--we-color-saturation) var(--we-color-lightness-700));
+  --we-color-danger-500: hsl(var(--we-color-danger-hue) var(--we-color-saturation) var(--we-color-lightness-500));
+  --we-color-danger-600: hsl(var(--we-color-danger-hue) var(--we-color-saturation) var(--we-color-lightness-600));
+
+  --we-color-ui-25: hsl(var(--we-color-ui-hue) var(--we-color-neutral-saturation) var(--we-color-lightness-25));
+  --we-color-ui-50: hsl(var(--we-color-ui-hue) var(--we-color-neutral-saturation) var(--we-color-lightness-50));
+  --we-color-ui-100: hsl(var(--we-color-ui-hue) var(--we-color-neutral-saturation) var(--we-color-lightness-100));
+  --we-color-ui-200: hsl(var(--we-color-ui-hue) var(--we-color-neutral-saturation) var(--we-color-lightness-200));
+  --we-color-ui-500: hsl(var(--we-color-ui-hue) var(--we-color-neutral-saturation) var(--we-color-lightness-500));
+  --we-color-ui-600: hsl(var(--we-color-ui-hue) var(--we-color-neutral-saturation) var(--we-color-lightness-600));
+  --we-color-ui-700: hsl(var(--we-color-ui-hue) var(--we-color-neutral-saturation) var(--we-color-lightness-700));
+  --we-color-ui-900: hsl(var(--we-color-ui-hue) var(--we-color-neutral-saturation) var(--we-color-lightness-900));
+
+  /* --- remap the dashboard's semantic vars onto WE tokens -------------- */
+  --bg: var(--we-color-ui-25);
+  --panel: var(--we-color-white);
+  --ink: var(--we-color-ui-900);
+  --muted: var(--we-color-ui-600);
+  --line: var(--we-color-ui-100);
+  --accent: var(--we-color-primary-600);
+  --accent-2: var(--we-color-warning-700);
+  --bad: var(--we-color-danger-600);
+  --warn: var(--we-color-warning-700);
+  --ok: var(--we-color-success-600);
+  --unknown: var(--we-color-ui-500);
+
+  /* Topology tier palette, derived from WE families. */
+  --we-tier-core: var(--we-color-primary-600);
+  --we-tier-active: var(--we-color-success-600);
+  --we-tier-language: hsl(280 var(--we-color-saturation) var(--we-color-lightness-600));
+  --we-tier-dependency-fork: var(--we-color-ui-500);
+  --we-tier-stale: var(--we-color-ui-200);
+  --we-tier-unknown: var(--we-color-ui-500);
+  --we-seed: var(--we-color-warning-700);
+  --we-environment: var(--we-color-ui-700);
+  --we-edge-needs: hsl(var(--we-color-ui-hue) var(--we-color-neutral-saturation) 45% / 0.5);
+  --we-edge-uses: var(--we-color-primary-500);
+  --we-edge-deploy: var(--we-color-danger-500);
+  --we-edge-deploy-to: var(--we-color-warning-700);
+}
+
+/* Dark theme — mirrors 2-themes/src/dark (saturation down, lightness inverted). */
+[data-we-theme="dark"] {
+  --we-color-saturation: 48%;
+  --we-color-neutral-saturation: 16%;
+  --we-color-lightness-25: 14%;
+  --we-color-lightness-50: 17%;
+  --we-color-lightness-100: 22%;
+  --we-color-lightness-200: 30%;
+  --we-color-lightness-300: 40%;
+  --we-color-lightness-400: 52%;
+  --we-color-lightness-500: 58%;
+  --we-color-lightness-600: 64%;
+  --we-color-lightness-700: 72%;
+  --we-color-lightness-900: 88%;
+  --we-color-white: #14171a;
+  --we-color-black: #f3f6f4;
+
+  --bg: hsl(var(--we-color-ui-hue) 18% 10%);
+  --panel: hsl(var(--we-color-ui-hue) 16% 14%);
+  --ink: hsl(var(--we-color-ui-hue) 12% 92%);
+  --muted: hsl(var(--we-color-ui-hue) 10% 64%);
+  --line: hsl(var(--we-color-ui-hue) 14% 24%);
+}
+
+/* Cyberpunk theme — high-saturation magenta/cyan, from 2-themes/src/cyberpunk. */
+[data-we-theme="cyberpunk"] {
+  --we-color-primary-hue: 315;
+  --we-color-ui-hue: 265;
+  --we-color-saturation: 88%;
+  --we-color-neutral-saturation: 40%;
+  --we-color-lightness-25: 12%;
+  --we-color-lightness-50: 16%;
+  --we-color-lightness-100: 24%;
+  --we-color-lightness-200: 34%;
+  --we-color-lightness-400: 58%;
+  --we-color-lightness-500: 64%;
+  --we-color-lightness-600: 70%;
+  --we-color-lightness-900: 90%;
+  --we-color-white: #160a1f;
+  --we-color-black: #f7e9ff;
+  --bg: #120618;
+  --panel: #1d0c28;
+  --ink: #f3e3ff;
+  --muted: #b78fd0;
+  --line: #3a1b4d;
+  --we-edge-needs: hsl(265 60% 70% / 0.55);
+}
+
+body {
+  font-family: var(--we-font-family);
+}

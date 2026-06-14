@@ -316,3 +316,120 @@ pre {
     padding: 14px;
   }
 }
+
+/* ===================== Weave language view ===================== */
+.weave-blurb { max-width: 760px; margin: 4px 0 12px; }
+.weave-blurb code { background: var(--panel); padding: 1px 5px; border-radius: 4px; border: 1px solid var(--line); }
+
+.weave-tabs { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.weave-tab { border: none; border-radius: 0; min-height: 32px; padding: 0 14px; background: var(--panel); }
+.weave-tab.active { background: var(--accent); color: #fff; }
+
+.weave-pane { display: none; }
+.weave-pane.active { display: block; }
+
+.weave-issues { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 14px; }
+.weave-ok { color: var(--ok); font-weight: 600; }
+.weave-issue { padding: 7px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); font-size: 13px; }
+.weave-issue code { background: rgba(0,0,0,0.05); padding: 0 5px; border-radius: 4px; margin: 0 4px; }
+.weave-issue.error { border-left: 4px solid var(--bad); }
+.weave-issue.warning { border-left: 4px solid var(--warn); }
+.weave-issue.info { border-left: 4px solid var(--unknown); }
+.weave-issue .muted { float: right; }
+
+.weave-targets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.weave-targets-label { font-weight: 600; color: var(--muted); }
+.weave-target { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; font-size: 12px; cursor: pointer; }
+.weave-target:hover { border-color: var(--accent); }
+
+.weave-graph-wrap { display: flex; gap: 14px; align-items: flex-start; }
+.weave-svg { flex: 1; overflow: auto; border: 1px solid var(--line); border-radius: 10px; background:
+  repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0 1px, transparent 1px 22px), var(--panel); }
+.weave-graph-svg { display: block; }
+.weave-gnode { cursor: pointer; transition: opacity 0.12s; }
+.weave-gnode:hover { opacity: 0.85; }
+.weave-gnode-label { fill: #fff; font-size: 12px; font-weight: 600; pointer-events: none; }
+.weave-col-head { fill: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.04em; }
+.weave-edge { transition: stroke-width 0.1s; }
+
+.weave-node-panel { width: 280px; flex-shrink: 0; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 10px; padding: 14px; min-height: 80px; display: none; }
+.weave-node-panel.active { display: block; }
+.weave-node-panel h3 { margin: 0 0 8px; }
+.weave-node-panel p { margin: 6px 0; }
+.weave-node-panel code { background: rgba(0,0,0,0.05); padding: 0 5px; border-radius: 4px; }
+
+.weave-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: 12px; color: var(--muted); }
+.weave-leg { display: inline-flex; align-items: center; gap: 5px; }
+.weave-leg .sw { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+.weave-leg .ring { width: 14px; height: 14px; border-radius: 4px; border: 2px solid #e0a000; display: inline-block; }
+
+.weave-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; }
+.weave-seeds { margin-bottom: 18px; }
+.weave-seed-card { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--panel); margin-bottom: 6px; }
+.weave-seed-card button { margin-left: auto; min-height: 28px; }
+
+.weave-forms { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.weave-card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.weave-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.weave-inline { font-size: 12px; color: var(--muted); display: inline-flex; gap: 4px; align-items: center; }
+.weave-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.weave-fields label { display: flex; flex-direction: column; font-size: 11px; color: var(--muted); gap: 3px; }
+.weave-fields input, .weave-fields select { min-height: 30px; padding: 0 6px; }
+.weave-profiles { margin-top: 10px; }
+.weave-profiles details { margin: 4px 0; }
+.weave-profiles summary { cursor: pointer; font-size: 12px; font-weight: 600; }
+.weave-profiles pre { margin: 4px 0; padding: 6px 8px; background: rgba(0,0,0,0.04); border-radius: 6px;
+  font-size: 11px; white-space: pre-wrap; }
+
+/* Weave deploy view */
+.weave-count { font-weight: 600; }
+.weave-count.passed { color: var(--ok); }
+.weave-count.warn { color: var(--warn); }
+.weave-count.failed { color: var(--bad); }
+.weave-rollout { margin: 6px 0 16px; }
+.weave-wave { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 6px 0; }
+.weave-wave-label { font-size: 12px; font-weight: 700; color: var(--muted); width: 70px; }
+.weave-table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.weave-table th, .weave-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.weave-table th { background: rgba(0,0,0,0.03); font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
+.weave-table tr:last-child td { border-bottom: none; }
+
+/* Weave auto-save status */
+.weave-save-status { font-size: 12px; font-weight: 600; margin-left: 6px; }
+.weave-save-status.dirty { color: var(--warn); }
+.weave-save-status.saving { color: var(--muted); }
+.weave-save-status.saved { color: var(--ok); }
+.weave-save-status.error { color: var(--bad); }
+
+/* ===================== Interactive topology ===================== */
+#we-theme-select { margin-left: 10px; min-height: 30px; }
+
+.weave-topo-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 10px; }
+.weave-ctl-sep { width: 1px; height: 20px; background: var(--line); }
+.weave-seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.weave-seg-btn { border: none; border-radius: 0; min-height: 30px; padding: 0 12px; background: var(--panel); }
+.weave-seg-btn.active { background: var(--accent); color: #fff; }
+
+.weave-svg { flex: 1; overflow: hidden; border: 1px solid var(--line); border-radius: var(--we-border-radius-lg, 12px);
+  background: var(--panel); touch-action: none; }
+#weave-topo-svg { display: block; cursor: grab; user-select: none; }
+#weave-topo-svg:active { cursor: grabbing; }
+
+.topo-node { cursor: grab; }
+.topo-node:active { cursor: grabbing; }
+.topo-box { transition: filter 0.12s; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.18)); }
+.topo-node:hover .topo-box { filter: drop-shadow(0 3px 8px rgba(0,0,0,0.28)); }
+.topo-label { fill: #fff; font-size: 12px; font-weight: 600; pointer-events: none; }
+.topo-ring { stroke: var(--we-color-warning-500, #e0a000); stroke-width: 2.5; }
+.weave-edge { transition: opacity 0.12s; }
+
+/* hover focus: dim everything, light up the node + neighbors */
+.topo-dimming #weave-nodes .topo-node { opacity: 0.28; }
+.topo-dimming #weave-edges .weave-edge { opacity: 0.08; }
+.topo-dimming #weave-nodes .topo-node.hot { opacity: 1; }
+.topo-dimming #weave-edges .weave-edge.hot { opacity: 1; }
+.topo-node.tier-dim { opacity: 0.18; }
+
+.weave-leg .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }

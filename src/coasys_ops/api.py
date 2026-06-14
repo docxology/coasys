@@ -1,12 +1,22 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Annotated
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Body, FastAPI, HTTPException
 from fastapi.responses import FileResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from .ops import CoasysOps
+from .weave.deploy import deploy_readiness as weave_deploy_readiness
+from .weave.export import json_schema as weave_json_schema
+from .weave.export import operation_plan as weave_operation_plan
+from .weave.graph import build_graph as weave_build_graph
+from .weave.graph import to_mermaid as weave_to_mermaid
+from .weave.loader import document_to_mapping, load_document, parse_document
+from .weave.seed import render_seed as weave_render_seed
+from .weave.validate import validate_document as weave_validate
+from .weave.writer import save_document as weave_save_document
 
 STATIC_DIR = Path(__file__).parent / "static"
 
@@ -106,5 +116,73 @@ def create_app(root: Path | None = None) -> FastAPI:
         if run is None:
             raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
         return {"run": run}
+
+    # ----------------------------------------------------------------- Weave
+    weave_root = root or Path.cwd()
+
+    @app.get("/api/weave/document")
+    def weave_document() -> dict[str, object]:
+        document = load_document(weave_root)
+        issues = weave_validate(document)
+        return {
+            "document": document_to_mapping(document),
+            "issues": [issue.to_dict() for issue in issues],
+            "targets": document.targets(),
+        }
+
+    @app.post("/api/weave/document")
+    def weave_save(payload: Annotated[dict, Body()] = None) -> dict[str, object]:
+        """Validate-gated save-back. Writes only when there are no errors."""
+        payload = payload or {}
+        try:
+            document = parse_document(payload)
+        except Exception as exc:  # noqa: BLE001 - surface parse errors to the editor
+            return {"ok": False, "saved": False, "parse_error": str(exc), "issues": []}
+        issues = weave_validate(document)
+        issue_dicts = [issue.to_dict() for issue in issues]
+        if any(i.level == "error" for i in issues):
+            return {"ok": False, "saved": False, "issues": issue_dicts}
+        path = weave_save_document(document, root=weave_root)
+        return {"ok": True, "saved": True, "issues": issue_dicts, "path": str(path)}
+
+    @app.get("/api/weave/schema")
+    def weave_schema() -> dict[str, object]:
+        return weave_json_schema()
+
+    @app.get("/api/weave/graph")
+    def weave_graph() -> dict[str, object]:
+        return weave_build_graph(load_document(weave_root)).to_dict()
+
+    @app.get("/api/weave/graph.mmd")
+    def weave_graph_mermaid() -> PlainTextResponse:
+        return PlainTextResponse(weave_to_mermaid(load_document(weave_root)))
+
+    @app.get("/api/weave/plan")
+    def weave_plan(profile: str = "build") -> dict[str, object]:
+        return weave_operation_plan(load_document(weave_root), profile)
+
+    @app.get("/api/weave/deploy-check")
+    def weave_deploy_check(environment: str | None = None) -> dict[str, object]:
+        return weave_deploy_readiness(load_document(weave_root), environment=environment)
+
+    @app.get("/api/weave/seed/{name}")
+    def weave_seed(name: str) -> dict[str, object]:
+        try:
+            return weave_render_seed(load_document(weave_root), name)
+        except (KeyError, ValueError) as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/api/weave/validate")
+    def weave_validate_payload(payload: Annotated[dict, Body()] = None) -> dict[str, object]:
+        payload = payload or {}
+        try:
+            document = parse_document(payload)
+        except Exception as exc:  # noqa: BLE001 - surface parse errors to the editor
+            return {"ok": False, "parse_error": str(exc), "issues": []}
+        issues = weave_validate(document)
+        return {
+            "ok": not any(i.level == "error" for i in issues),
+            "issues": [issue.to_dict() for issue in issues],
+        }
 
     return app

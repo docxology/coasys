@@ -15,6 +15,8 @@ The documentation is split by operator task and maintainer concern:
 - [CLI reference](docs/CLI.md)
 - [API reference](docs/API.md)
 - [Configuration](docs/CONFIGURATION.md)
+- [Weave language](docs/WEAVE_LANGUAGE.md)
+- [Weave grammar & lifecycle semantics](docs/WEAVE_GRAMMAR.md)
 - [Playbooks](docs/PLAYBOOKS.md)
 - [State and reporting](docs/STATE_AND_REPORTING.md)
 - [Dashboard](docs/DASHBOARD.md)
@@ -34,7 +36,32 @@ uv run coasys report --output workspace/state/REPORT.md
 uv run coasys serve --host 127.0.0.1 --port 5050
 ```
 
-Open `http://127.0.0.1:5050` after `serve` starts.
+Open `http://127.0.0.1:5050` after `serve` starts. The dashboard's **Weave** tab
+provides the visual language: a dependency/deploy/design graph, schema-driven
+forms, and a deployment-readiness view.
+
+## Weave language
+
+Weave is the configuration / design / deployment language for the fleet — a
+backward-compatible superset of `coasys.yml` that also models the WE design
+layer (app bindings + launcher seeds), dependency ordering, environments, and
+deploy gates. See [docs/WEAVE_LANGUAGE.md](docs/WEAVE_LANGUAGE.md) and
+[examples/coasys.weave.yml](examples/coasys.weave.yml).
+
+```bash
+uv run coasys weave lint            # validate structure + semantics
+uv run coasys weave targets         # priority targets, most important first
+uv run coasys weave graph -f mermaid# the visual backbone as data
+uv run coasys weave plan setup      # dependency-ordered bootstrap waves
+uv run coasys weave plan deploy     # ordered, wave-by-wave rollout plan
+uv run coasys weave deploy-check    # deployment readiness + gates
+uv run coasys weave seed flux-launcher -o we-seed.json  # compile a real WE seed
+uv run coasys weave export-yml      # compile back down to coasys.yml
+uv run coasys weave fmt             # rewrite canonically (validate-gated)
+```
+
+The dashboard **Weave** tab's Schema view **auto-saves** edits back to
+`coasys.weave.yml` (validate-gated and atomic) via `POST /api/weave/document`.
 
 For release-readiness handoff, run the dry-run gate:
 

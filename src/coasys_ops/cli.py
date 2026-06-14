@@ -8,8 +8,10 @@ import uvicorn
 
 from .api import create_app
 from .ops import CoasysOps
+from .weave.cli import app as weave_app
 
 app = typer.Typer(no_args_is_help=True, help="Coasys repository operations dashboard.")
+app.add_typer(weave_app, name="weave")
 
 
 def _ops() -> CoasysOps:

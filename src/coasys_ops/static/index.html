@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Coasys Ops</title>
     <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="stylesheet" href="/static/we-theme.css" />
   </head>
   <body>
     <header class="topbar">
@@ -14,7 +15,13 @@
         <button class="nav-button" data-view="repos" title="Repositories">Repos</button>
         <button class="nav-button" data-view="runs" title="Runs">Runs</button>
         <button class="nav-button" data-view="topology" title="Topology">Topology</button>
+        <button class="nav-button" data-view="weave" title="Weave language">Weave</button>
       </nav>
+      <select id="we-theme-select" aria-label="WE theme" title="WE design-system theme">
+        <option value="light">WE · Light</option>
+        <option value="dark">WE · Dark</option>
+        <option value="cyberpunk">WE · Cyberpunk</option>
+      </select>
     </header>
 
     <main>
@@ -67,9 +74,79 @@
         <div id="topology-groups" class="topology-grid"></div>
       </section>
 
+      <section id="weave" class="view">
+        <div class="section-heading">
+          <h1>Weave</h1>
+          <div class="action-row">
+            <div class="weave-tabs">
+              <button class="weave-tab active" data-weave-tab="graph">Graph</button>
+              <button class="weave-tab" data-weave-tab="schema">Schema</button>
+              <button class="weave-tab" data-weave-tab="deploy">Deploy</button>
+            </div>
+            <a class="button-link" href="/api/weave/graph.mmd" target="_blank" rel="noreferrer">Mermaid</a>
+            <button id="weave-refresh" class="primary-button">Reload</button>
+          </div>
+        </div>
+        <p class="muted weave-blurb">
+          The configuration / design / deployment language for the fleet — a
+          backward-compatible superset of <code>coasys.yml</code>. The graph is
+          the visual backbone; the schema view is the form-driven editor.
+        </p>
+        <div id="weave-issues" class="weave-issues"></div>
+
+        <div id="weave-graph" class="weave-pane active">
+          <div id="weave-targets" class="weave-targets"></div>
+          <div class="weave-topo-controls">
+            <div class="weave-seg" role="group" aria-label="Layout">
+              <button class="weave-seg-btn active" data-layout="waves">Waves</button>
+              <button class="weave-seg-btn" data-layout="force">Force</button>
+            </div>
+            <span class="weave-ctl-sep"></span>
+            <label class="weave-inline"><input type="checkbox" class="edge-filter" data-edge="needs" checked /> needs</label>
+            <label class="weave-inline"><input type="checkbox" class="edge-filter" data-edge="deploy-needs" checked /> deploy-needs</label>
+            <label class="weave-inline"><input type="checkbox" class="edge-filter" data-edge="uses" checked /> uses</label>
+            <label class="weave-inline"><input type="checkbox" class="edge-filter" data-edge="deploy-to" checked /> deploy-to</label>
+            <span class="weave-ctl-sep"></span>
+            <select id="weave-tier-filter" aria-label="Highlight tier">
+              <option value="">all tiers</option>
+            </select>
+            <button id="weave-topo-reset" title="Reset view">Reset view</button>
+          </div>
+          <div class="weave-graph-wrap">
+            <div id="weave-svg" class="weave-svg"></div>
+            <aside id="weave-node" class="weave-node-panel"></aside>
+          </div>
+          <div class="weave-legend" id="weave-legend"></div>
+        </div>
+
+        <div id="weave-schema" class="weave-pane">
+          <div class="weave-toolbar">
+            <label class="weave-inline"><input type="checkbox" id="weave-autosave" checked /> auto-save</label>
+            <button id="weave-save">Save now</button>
+            <button id="weave-validate">Validate</button>
+            <button id="weave-download">Download JSON</button>
+            <span id="weave-edit-status" class="weave-save-status"></span>
+          </div>
+          <div id="weave-seeds" class="weave-seeds"></div>
+          <div id="weave-forms" class="weave-forms"></div>
+        </div>
+
+        <div id="weave-deploy" class="weave-pane">
+          <div class="weave-toolbar">
+            <label class="weave-inline">environment
+              <select id="weave-deploy-env"><option value="">all</option></select>
+            </label>
+            <span id="weave-deploy-summary" class="muted"></span>
+          </div>
+          <div id="weave-rollout" class="weave-rollout"></div>
+          <div id="weave-deploy-table" class="table-wrap"></div>
+        </div>
+      </section>
+
       <aside id="detail" class="detail-panel" aria-live="polite"></aside>
     </main>
 
     <script src="/static/app.js" type="module"></script>
+    <script src="/static/weave.js" type="module"></script>
   </body>
 </html>

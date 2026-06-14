@@ -11,6 +11,8 @@ Start here by goal:
 | Run fleet commands safely | [CLI Reference](CLI.md) |
 | Call the local dashboard API | [API Reference](API.md) |
 | Configure repositories and playbooks | [Configuration](CONFIGURATION.md) |
+| Author the fleet as a visual + textual language | [Weave Language](WEAVE_LANGUAGE.md) |
+| Read the formal grammar + lifecycle semantics | [Weave Grammar](WEAVE_GRAMMAR.md) |
 | Promote detected commands into safe operations | [Playbooks](PLAYBOOKS.md) |
 | Interpret SQLite state, logs, and reports | [State and Reporting](STATE_AND_REPORTING.md) |
 | Navigate and smoke-test the web UI | [Dashboard](DASHBOARD.md) |

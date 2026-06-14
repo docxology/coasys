@@ -1,0 +1,254 @@
+# Coasys fleet — Weave document
+#
+# Weave is the configuration / design / deployment language for the coasys
+# repository fleet. It is a backward-compatible superset of coasys.yml: the
+# legacy file still loads, and this file compiles back down to it
+# (`coasys weave export-yml`).
+#
+# Three layers are expressed here:
+#   - configuration : org, workspace, defaults, repos, tiers, sources
+#   - design        : `we:` bindings + `seeds:` (compile to real we-seed.json)
+#   - deployment    : `playbooks:` + `environments:` + `needs:` ordering edges
+#
+# Visual surfaces (dashboard → Weave): a dependency/deploy graph and
+# schema-driven forms, both derived mechanically from this document.
+
+version: 1
+
+weave:
+  name: coasys-fleet
+  org: coasys
+  description: >-
+    The AD4M / WE / Flux ecosystem — an agent-centric, decentralized
+    application stack.
+
+workspace:
+  repos_dir: workspace/repos
+  state_dir: workspace/state
+
+defaults:
+  timeout_seconds: 600
+  clone:
+    protocol: https
+    depth: 1
+    partial: true
+  execute_detected_validation: false
+  package_manager: uv
+
+# ---------------------------------------------------------------------------
+# Deployment environments. Protected environments require an explicit operator
+# decision; secrets are referenced by NAME only and never stored in-repo.
+# ---------------------------------------------------------------------------
+environments:
+  staging:
+    description: Pre-release validation environment.
+    requires_env: [GITHUB_TOKEN]
+  production:
+    description: Public release channel (npm / GitHub releases).
+    requires_env: [NPM_TOKEN, GITHUB_TOKEN]
+    protected: true
+
+# ---------------------------------------------------------------------------
+# Launcher seeds — the WE "design" layer. Each seed compiles to a real
+# we-seed.json via `coasys weave seed <name>`.
+# ---------------------------------------------------------------------------
+seeds:
+  flux-launcher:
+    project:
+      name: Flux Launcher
+      version: 1.0.0
+      description: Single-app launcher embedding Flux.
+      author: coasys
+    host: {}
+    ad4m: {}
+    apps:
+      - use: flux            # full-screen at "/" (single-app mode)
+
+  coasys-workspace:
+    project:
+      name: Coasys Workspace
+      version: 1.0.0
+      description: Multi-app launcher with Flux and the WE reference app.
+      author: coasys
+    host:
+      ui:
+        enableTemplateSwitching: true
+    ad4m: {}
+    apps:
+      - use: flux
+      - use: we
+
+# ---------------------------------------------------------------------------
+# Repositories. `needs` are build/operate ordering edges; deploy ordering lives
+# on playbooks.deploy.needs. `target: true` (and the core tier) marks priority
+# targets operated first.
+# ---------------------------------------------------------------------------
+repos:
+  ad4m:
+    tier: core
+    target: true
+    priority: 100
+    description: The AD4M runtime — agent-centric meta-ontology and language runtime.
+    stack: [typescript, rust]
+    source:
+      branch: dev
+    playbooks:
+      setup:
+        run: [pnpm install]
+        check: [test -f package.json]
+      validate:
+        run: [pnpm run lint]
+        check: [test -f package.json]
+        automatic: false
+      build:
+        run: [pnpm run build-libs]
+        check: [test -f package.json]
+      start:
+        run: [pnpm run serve]
+        check: [test -f package.json]
+
+  ad4m-host:
+    tier: core
+    target: true
+    priority: 90
+    description: Headless AD4M executor / host process.
+    stack: [typescript, rust]
+    needs: [ad4m]
+    playbooks:
+      validate: { run: [npm run build], check: [test -f package.json], automatic: false }
+      build: { run: [npm run build], check: [test -f package.json] }
+      start: { run: [npm run dev], check: [test -f package.json] }
+
+  perspect3ve:
+    tier: core
+    priority: 70
+    description: Reference AD4M client / perspective explorer.
+    stack: [typescript]
+    needs: [ad4m]
+    playbooks:
+      validate: { run: [pnpm run check], check: [test -f package.json], automatic: false }
+      build: { run: [pnpm run build], check: [test -f package.json] }
+      start: { run: [pnpm run dev], check: [test -f package.json] }
+
+  we:
+    tier: core
+    target: true
+    priority: 95
+    description: Decentralized application framework + design system on AD4M.
+    stack: [typescript, rust]
+    needs: [ad4m]
+    we:
+      app:
+        id: we
+        name: WE
+        route: /we
+        capabilities: [perspectives, languages, agents]
+        paths:
+          project_root: ../we/apps/we-web
+          dist: ../we/apps/we-web/dist
+          dev_server: { port: 3000, host: localhost }
+        commands:
+          install: pnpm install
+          build: pnpm build
+          dev: pnpm dev
+    playbooks:
+      setup: { run: [pnpm install], check: [test -f package.json] }
+      validate: { run: [pnpm run validate:seed], check: [test -f package.json], automatic: false }
+      build: { run: [pnpm run build:web], check: [test -f package.json] }
+      start: { run: [pnpm run dev:web], check: [test -f package.json] }
+
+  flux:
+    tier: core
+    target: true
+    priority: 80
+    description: Flagship social app built on AD4M.
+    stack: [typescript]
+    needs: [ad4m]
+    we:
+      app:
+        id: flux
+        name: Flux
+        route: /flux
+        capabilities: [perspectives, languages, agents]
+        paths:
+          project_root: ../flux/app
+          dist: ../flux/app/dist
+          dev_server: { port: 3030, host: localhost }
+        commands:
+          install: yarn install
+          build: yarn build
+          dev: yarn dev
+    playbooks:
+      setup: { run: [yarn install], check: [test -f package.json] }
+      validate: { run: [pnpm run typecheck], check: [test -f package.json], automatic: false }
+      build: { run: [pnpm run build], check: [test -f package.json] }
+      start: { run: [pnpm run dev], check: [test -f package.json] }
+      deploy:
+        run: [pnpm run publish:all]
+        check: [pnpm run publish:dry-run]
+        environment: production
+        needs: [ad4m, we]
+
+  ad4m-devtools:
+    tier: core
+    priority: 40
+    stack: [typescript]
+    needs: [ad4m]
+    playbooks:
+      validate: { run: [pnpm run test], check: [test -f package.json], automatic: false }
+      build: { run: [pnpm run build], check: [test -f package.json] }
+      start: { run: [pnpm run dev], check: [test -f package.json] }
+
+  ad4m-wind-tunnel:
+    tier: core
+    priority: 30
+    description: Load / performance harness for AD4M.
+    stack: [typescript, rust]
+    needs: [ad4m]
+    playbooks:
+      validate: { run: [npm run build], check: [test -f package.json], automatic: false }
+      build: { run: [npm run build], check: [test -f package.json] }
+      start: { run: [npm run start], check: [test -f package.json] }
+
+  paperclip:
+    tier: active
+    priority: 20
+    stack: [typescript]
+    needs: [ad4m]
+    playbooks:
+      validate: { run: [pnpm run typecheck], check: [test -f package.json], automatic: false }
+      build: { run: [pnpm run build], check: [test -f package.json] }
+      start: { run: [pnpm run dev], check: [test -f package.json] }
+      deploy:
+        run: [pnpm run release]
+        check: [pnpm run release:preflight]
+        environment: production
+        env: [GITHUB_TOKEN, NPM_TOKEN]
+        needs: [ad4m]
+
+  joining-service:
+    tier: active
+    stack: [typescript]
+    playbooks:
+      validate: { run: [pnpm run typecheck], check: [test -f package.json], automatic: false }
+      build: { run: [pnpm run build], check: [test -f package.json] }
+      start: { run: [pnpm run start], check: [test -f package.json] }
+
+  social-dna:
+    tier: active
+    description: Social DNA / Holochain expression layer.
+    stack: [typescript, holochain]
+    playbooks:
+      validate: { run: [npm run build], check: [test -f package.json], automatic: false }
+      build: { run: [npm run build], check: [test -f package.json] }
+
+  zeroclaw:
+    tier: active
+    stack: [rust]
+    playbooks:
+      setup: { run: [cargo fetch], check: [test -f Cargo.toml] }
+      validate:
+        run: [cargo metadata --no-deps --format-version 1]
+        check: [test -f Cargo.toml]
+        automatic: false
+      build: { run: [cargo build], check: [test -f Cargo.toml] }

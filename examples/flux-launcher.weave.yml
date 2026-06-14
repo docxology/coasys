@@ -1,0 +1,61 @@
+# Minimal Weave document — a single-app Flux launcher.
+#
+# Demonstrates the smallest useful design slice: one repo with a WE app binding
+# and one seed that embeds it. Compile the launcher with:
+#
+#   coasys weave seed flux-launcher --path examples/flux-launcher.weave.yml -o we-seed.json
+#
+# Because the seed has a single app, WE renders it full-screen at "/".
+
+version: 1
+
+weave:
+  name: flux-only
+  org: coasys
+  description: A standalone, single-app Flux launcher.
+
+seeds:
+  flux-launcher:
+    project:
+      name: Flux
+      version: 1.0.0
+      description: Standalone Flux launcher.
+      author: coasys
+    host: {}
+    ad4m: {}
+    apps:
+      - use: flux
+        route: /          # full-screen single-app mode
+
+repos:
+  ad4m:
+    tier: core
+    target: true
+    priority: 100
+    stack: [typescript, rust]
+    playbooks:
+      build: { run: [pnpm run build-libs], check: [test -f package.json] }
+
+  flux:
+    tier: core
+    target: true
+    priority: 80
+    stack: [typescript]
+    needs: [ad4m]
+    we:
+      app:
+        id: flux
+        name: Flux
+        route: /flux
+        capabilities: [perspectives, languages, agents]
+        paths:
+          project_root: ../flux/app
+          dist: ../flux/app/dist
+          dev_server: { port: 3030, host: localhost }
+        commands:
+          install: yarn install
+          build: yarn build
+          dev: yarn dev
+    playbooks:
+      build: { run: [pnpm run build], check: [test -f package.json] }
+      start: { run: [pnpm run dev], check: [test -f package.json] }
