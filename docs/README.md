@@ -3,6 +3,34 @@
 This directory is the operator and maintainer documentation for the local-first
 Coasys repository operations dashboard.
 
+## The dashboard
+
+The control plane after `uv run coasys serve` — fleet overview, per-repo status,
+run history, and topology:
+
+![Dashboard overview](images/dashboard.png)
+
+## The Weave language (visual)
+
+Weave is the configuration / design / deployment language for the fleet — a
+backward-compatible superset of `coasys.yml`. The dashboard's **Weave** tab is
+its visual surface.
+
+**Topology** — the dependency/deploy graph is the visual backbone (tier-coloured
+nodes, priority targets, validity check):
+
+![Weave dependency graph](images/weave-graph.png)
+
+**Onboard** — scaffold and register a new AD4M app from `create-ad4m-app`; it
+appears instantly in the topology, plans, and seeds:
+
+![Weave onboard tab](images/weave-onboard.png)
+
+**Deploy** — wave-by-wave rollout order with per-repo gate state and the exact
+reason each repo is blocked:
+
+![Weave deploy readiness](images/weave-deploy.png)
+
 Start here by goal:
 
 | Goal | Document |
