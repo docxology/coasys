@@ -17,6 +17,7 @@ from .deploy import deploy_readiness
 from .export import json_schema, operation_plan, to_coasys_yml
 from .graph import build_graph, to_dot, to_mermaid
 from .loader import load_document
+from .scaffold import register_app, scaffold_command
 from .seed import render_seed_json
 from .validate import has_errors, validate_document
 from .writer import resolve_target_path, save_document
@@ -187,6 +188,68 @@ def fmt(
         return
     written = save_document(document, root=base if base.is_dir() else base.parent, target=target)
     typer.echo(str(written))
+
+
+@app.command()
+def starters(path: PathOpt = None) -> None:
+    """List the scaffolding starters and their templates."""
+    document = _doc(path)
+    if not document.starters:
+        typer.echo("no starters defined")
+        return
+    for key, starter in document.starters.items():
+        typer.echo(f"{key}: {starter.command}  ({starter.description})")
+        for tname, tpl in starter.templates.items():
+            mark = " *default" if (tname == starter.default_template) else ""
+            typer.echo(f"    {tname:<8} {tpl.framework}{mark}")
+
+
+@app.command("create-app")
+def create_app(
+    name: Annotated[str, typer.Argument(help="New app name (repo key).")],
+    template: Annotated[
+        str | None, typer.Option("--template", "-t", help="Template (e.g. solid).")
+    ] = None,
+    starter: Annotated[str, typer.Option("--starter", help="Starter key.")] = "ad4m",
+    register: Annotated[
+        bool, typer.Option("--register", help="Add the app to the document and save.")
+    ] = False,
+    run: Annotated[bool, typer.Option("--run", help="Execute the scaffold command (npx).")] = False,
+    path: PathOpt = None,
+) -> None:
+    """Scaffold a new AD4M app from a starter, and optionally register + run it."""
+    document = _doc(path)
+    if starter not in document.starters:
+        defined = ", ".join(document.starters) or "none"
+        typer.echo(f"unknown starter {starter!r}; defined: {defined}")
+        raise typer.Exit(code=1)
+    base = path or Path.cwd()
+    base = base if base.is_dir() else base.parent
+
+    if register:
+        try:
+            new_doc, command = register_app(document, name, starter_key=starter, template=template)
+        except (KeyError, ValueError) as exc:
+            typer.echo(f"error: {exc}")
+            raise typer.Exit(code=1) from exc
+        issues = validate_document(new_doc)
+        if has_errors(issues):
+            for issue in issues:
+                if issue.level == "error":
+                    typer.echo(f"ERROR {issue.code}: {issue.message}")
+            raise typer.Exit(code=1)
+        save_document(new_doc, root=base)
+        typer.echo(f"registered app {name!r} into the fleet")
+    else:
+        command = scaffold_command(document.starters[starter], name, template)
+
+    typer.echo(command)
+    if run:
+        import shlex
+        import subprocess
+
+        typer.echo(f"running: {command}")
+        subprocess.run(shlex.split(command), check=False)
 
 
 @app.command()

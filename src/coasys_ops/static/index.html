@@ -82,6 +82,7 @@
               <button class="weave-tab active" data-weave-tab="graph">Graph</button>
               <button class="weave-tab" data-weave-tab="schema">Schema</button>
               <button class="weave-tab" data-weave-tab="deploy">Deploy</button>
+              <button class="weave-tab" data-weave-tab="onboard">Onboard</button>
             </div>
             <a class="button-link" href="/api/weave/graph.mmd" target="_blank" rel="noreferrer">Mermaid</a>
             <button id="weave-refresh" class="primary-button">Reload</button>
@@ -140,6 +141,28 @@
           </div>
           <div id="weave-rollout" class="weave-rollout"></div>
           <div id="weave-deploy-table" class="table-wrap"></div>
+        </div>
+
+        <div id="weave-onboard" class="weave-pane">
+          <p class="muted weave-blurb">
+            Scaffold a new AD4M app from <code>create-ad4m-app</code> and register
+            it into the fleet — it appears instantly in the topology, plans, and
+            seeds. The on-ramp for new developers.
+          </p>
+          <div id="weave-starters"></div>
+          <div class="weave-onboard-form">
+            <h3>Create &amp; register an app</h3>
+            <div class="weave-fields">
+              <label>app name<input id="onboard-name" placeholder="my-ad4m-app" /></label>
+              <label>starter<select id="onboard-starter"></select></label>
+              <label>template<select id="onboard-template"></select></label>
+            </div>
+            <div class="weave-toolbar">
+              <button id="onboard-create" class="primary-button">Create &amp; register</button>
+              <span id="onboard-status" class="weave-save-status"></span>
+            </div>
+            <div id="onboard-result"></div>
+          </div>
         </div>
       </section>
 

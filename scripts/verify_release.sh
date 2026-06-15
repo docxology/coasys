@@ -53,8 +53,8 @@ import os
 from urllib.request import urlopen
 
 summary = json.load(urlopen(os.environ["COASYS_SMOKE_URL"], timeout=10))
-assert summary["repo_count"] == 98, summary
-assert summary["cloned_count"] == 98, summary
+assert summary["repo_count"] == 99, summary
+assert summary["cloned_count"] == 99, summary
 assert summary["dirty_count"] == 0, summary
 assert summary["behind_count"] == 0, summary
 PY

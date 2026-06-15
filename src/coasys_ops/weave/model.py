@@ -154,6 +154,13 @@ class RepoSource(WeaveBase):
     branch: str | None = None
 
 
+class ScaffoldRef(WeaveBase):
+    """Provenance: which starter + template a repo was scaffolded from."""
+
+    starter: str
+    template: str | None = None
+
+
 class Repo(WeaveBase):
     """A managed repository in the fleet."""
 
@@ -170,6 +177,34 @@ class Repo(WeaveBase):
     timeout_seconds: int | None = None
     playbooks: dict[str, Playbook] = Field(default_factory=dict)
     we: WeBinding | None = None
+    # Set when this repo was created via `coasys weave create-app`.
+    scaffold: ScaffoldRef | None = None
+
+
+class StarterTemplate(WeaveBase):
+    """One template offered by a starter (e.g. solid, react, vue, r3f)."""
+
+    framework: str = ""
+    description: str = ""
+    default: bool = False
+
+
+class Starter(WeaveBase):
+    """A scaffolding toolkit that creates new AD4M apps.
+
+    Models ``coasys/create-ad4m-app``: an ``npx`` command, a source ``repo`` in
+    the fleet, and a set of framework templates. The on-ramp for new developers
+    — `coasys weave create-app` and the dashboard Onboard tab build on this.
+    """
+
+    command: str
+    repo: str | None = None
+    description: str = ""
+    docs_url: str | None = None
+    templates: dict[str, StarterTemplate] = Field(default_factory=dict)
+    default_template: str | None = None
+    # AD4M capabilities granted to scaffolded apps by default.
+    capabilities: list[str] = Field(default_factory=list)
 
 
 class SeedProject(WeaveBase):
@@ -204,6 +239,7 @@ class WeaveDocument(WeaveBase):
     workspace: Workspace = Field(default_factory=Workspace)
     defaults: Defaults = Field(default_factory=Defaults)
     environments: dict[str, Environment] = Field(default_factory=dict)
+    starters: dict[str, Starter] = Field(default_factory=dict)
     seeds: dict[str, Seed] = Field(default_factory=dict)
     repos: dict[str, Repo] = Field(default_factory=dict)
 

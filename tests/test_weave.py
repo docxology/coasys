@@ -72,11 +72,32 @@ def test_legacy_coasys_yml_loads_as_superset():
     assert doc.defaults.clone.depth == 1
 
 
+def test_legacy_coasys_yml_preserves_starters():
+    # Regression: the legacy hybrid pass-through once dropped `starters`, which
+    # silently broke the dashboard Onboard tab against the real coasys.yml.
+    legacy = {
+        "org": "coasys",
+        "repos": {"ad4m": {"tier": "core"}},
+        "starters": {
+            "ad4m": {
+                "command": "npx create-ad4m-app",
+                "repo": "create-ad4m-app",
+                "templates": {"solid": {"framework": "solidjs", "default": True}},
+            }
+        },
+    }
+    doc = parse_document(legacy)
+    assert "ad4m" in doc.starters
+    assert doc.starters["ad4m"].templates["solid"].framework == "solidjs"
+
+
 def test_real_coasys_yml_roundtrips_if_present():
     root = Path(__file__).resolve().parents[1]
     doc = load_document(root)
     # The repo ships a coasys.yml; loading the project root must succeed.
     assert doc.repos, "expected repos loaded from coasys.yml or coasys.weave.yml"
+    # The shipped coasys.yml defines the ad4m starter; the Onboard tab needs it.
+    assert "ad4m" in doc.starters
 
 
 # --------------------------------------------------------------------------- #
@@ -381,3 +402,89 @@ def test_deploy_without_gate_is_blocked():
     status = report["statuses"][0]
     assert status["state"] == "blocked"
     assert any("dry-run" in reason for reason in status["reasons"])
+
+
+# --------------------------------------------------------------------------- #
+# Scaffolding — create-ad4m-app integration
+# --------------------------------------------------------------------------- #
+
+
+def test_starters_present_in_example():
+    doc = _example()
+    assert "ad4m" in doc.starters
+    starter = doc.starters["ad4m"]
+    assert starter.command == "npx create-ad4m-app"
+    assert starter.default_template == "solid"
+    assert set(starter.templates) == {"solid", "react", "vue", "r3f"}
+    assert doc.starters["ad4m"].repo == "create-ad4m-app"
+
+
+def test_create_ad4m_app_is_a_target_repo():
+    doc = _example()
+    assert "create-ad4m-app" in doc.repos
+    assert "create-ad4m-app" in doc.targets()
+    assert "setup" in doc.repos["create-ad4m-app"].playbooks
+
+
+def test_scaffold_command_includes_template():
+    from coasys_ops.weave.scaffold import scaffold_command
+
+    doc = _example()
+    ad4m = doc.starters["ad4m"]
+    assert scaffold_command(ad4m, "notes", None) == "npx create-ad4m-app notes --template solid"
+    assert scaffold_command(ad4m, "notes", "react") == "npx create-ad4m-app notes --template react"
+
+
+def test_register_app_adds_full_fleet_member():
+    from coasys_ops.weave.scaffold import register_app
+
+    doc = _example()
+    new_doc, cmd = register_app(doc, "my-notes", template="react")
+    assert "my-notes" not in doc.repos  # original untouched (pure)
+    repo = new_doc.repos["my-notes"]
+    assert repo.tier == "active"
+    assert repo.stack == ["react"]
+    assert repo.needs == ["ad4m"]
+    assert repo.scaffold.starter == "ad4m" and repo.scaffold.template == "react"
+    assert repo.we.app.route == "/my-notes"
+    assert sorted(repo.playbooks) == ["build", "setup", "start", "validate"]
+    assert "--template react" in cmd
+    assert not has_errors(validate_document(new_doc))
+
+
+def test_register_app_unique_dev_ports():
+    from coasys_ops.weave.scaffold import register_app
+
+    doc = _example()
+    d1, _ = register_app(doc, "app-one")
+    d2, _ = register_app(d1, "app-two")
+    ports = [
+        r.we.app.paths.dev_server.port
+        for r in d2.repos.values()
+        if r.we and r.we.app and r.we.app.paths and r.we.app.paths.dev_server
+    ]
+    assert len(ports) == len(set(ports))  # no collisions
+
+
+def test_register_app_rejects_duplicate_and_unknown_template():
+    from coasys_ops.weave.scaffold import register_app
+
+    doc = _example()
+    with pytest.raises(ValueError):
+        register_app(doc, "flux")  # already exists
+    with pytest.raises(ValueError):
+        register_app(doc, "x", template="svelte")  # unknown template
+
+
+def test_registered_app_appears_in_graph_and_roundtrips():
+    from coasys_ops.weave.scaffold import register_app
+    from coasys_ops.weave.writer import document_to_weave_yaml
+
+    doc = _example()
+    new_doc, _ = register_app(doc, "my-notes")
+    graph = build_graph(new_doc)
+    labels = {n.label for n in graph.nodes}
+    assert "my-notes" in labels
+    # Survives canonical serialisation (scaffold provenance preserved).
+    reloaded = parse_text(document_to_weave_yaml(new_doc))
+    assert reloaded.repos["my-notes"].scaffold.starter == "ad4m"

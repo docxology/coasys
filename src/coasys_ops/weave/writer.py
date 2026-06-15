@@ -9,6 +9,7 @@ semantic errors should never be persisted.
 
 from __future__ import annotations
 
+import hashlib
 import os
 import tempfile
 from pathlib import Path
@@ -20,7 +21,16 @@ from .loader import DOCUMENT_NAMES, find_document
 from .model import WeaveDocument
 
 # Canonical top-level key order.
-_TOP_ORDER = ("version", "weave", "workspace", "defaults", "environments", "seeds", "repos")
+_TOP_ORDER = (
+    "version",
+    "weave",
+    "workspace",
+    "defaults",
+    "environments",
+    "starters",
+    "seeds",
+    "repos",
+)
 # Canonical per-repo key order.
 _REPO_ORDER = (
     "tier",
@@ -32,6 +42,7 @@ _REPO_ORDER = (
     "needs",
     "env",
     "timeout_seconds",
+    "scaffold",
     "we",
     "playbooks",
 )
@@ -167,3 +178,17 @@ def save_document(
         if os.path.exists(tmp_path):
             os.unlink(tmp_path)
     return destination
+
+
+def current_file_hash(root: Path | None = None) -> str | None:
+    """SHA-256 of the on-disk document the dashboard loaded, or ``None``.
+
+    Used for optimistic concurrency: the file is also hand-editable (see module
+    docstring), so a dashboard save carries the hash it loaded; if the bytes on
+    disk changed underneath it, the save is refused rather than clobbering the
+    external edit.
+    """
+    path = find_document(root)
+    if path is None:
+        return None
+    return hashlib.sha256(path.read_bytes()).hexdigest()

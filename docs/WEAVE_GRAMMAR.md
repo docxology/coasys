@@ -20,8 +20,15 @@ document     = "version" INT ,
                [ "workspace" workspace ] ,
                [ "defaults" defaults ] ,
                [ "environments" "{" { ident ":" environment } "}" ] ,
+               [ "starters" "{" { ident ":" starter } "}" ] ,
                [ "seeds" "{" { ident ":" seed } "}" ] ,
                [ "repos" "{" { ident ":" repo } "}" ] ;
+
+starter      = "command" STRING ,
+               [ "repo" ident ] , [ "description" STRING ] , [ "docs_url" STRING ] ,
+               [ "default_template" ident ] , [ "capabilities" [ capability * ] ] ,
+               [ "templates" "{" { ident ":" starter_template } "}" ] ;
+starter_template = { "framework" STRING | "description" STRING | "default" BOOL } ;
 
 meta         = { "name" STRING | "org" STRING | "description" STRING } ;
 
@@ -49,7 +56,9 @@ repo         = { "tier" tier
                | "env" [ STRING * ]
                | "timeout_seconds" INT
                | "we" we_binding
+               | "scaffold" scaffold_ref
                | "playbooks" "{" { profile ":" playbook } "}" } ;
+scaffold_ref = "starter" ident , [ "template" ident ] ;
 tier         = "core" | "active" | "language" | "dependency-fork" | "stale" | "unknown" ;
 source       = { "url" STRING | "clone_url" STRING | "branch" STRING } ;
 

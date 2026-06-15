@@ -37,9 +37,11 @@ from .model import (
     Playbook,
     Repo,
     Seed,
+    Starter,
     WeApp,
     WeaveDocument,
 )
+from .scaffold import register_app, scaffold_command
 from .validate import Issue, validate_document
 from .writer import document_to_weave_yaml, save_document
 
@@ -51,13 +53,16 @@ __all__ = [
     "Playbook",
     "Repo",
     "Seed",
+    "Starter",
     "WeApp",
     "WeaveDocument",
     "build_graph",
     "deploy_readiness",
     "document_to_mapping",
     "document_to_weave_yaml",
+    "register_app",
     "save_document",
+    "scaffold_command",
     "load_document",
     "parse_document",
     "validate_document",

@@ -13,6 +13,7 @@ CORE_REPOS = {
     "ad4m-host",
     "ad4m-devtools",
     "ad4m-wind-tunnel",
+    "create-ad4m-app",
 }
 
 DEPENDENCY_FORKS = {

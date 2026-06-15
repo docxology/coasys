@@ -49,6 +49,25 @@ environments:
     protected: true
 
 # ---------------------------------------------------------------------------
+# Starters — the developer on-ramp. `coasys weave create-app NAME` (and the
+# dashboard Onboard tab) scaffold a new AD4M app from create-ad4m-app and
+# register it into this document as a first-class repo.
+# ---------------------------------------------------------------------------
+starters:
+  ad4m:
+    command: npx create-ad4m-app
+    repo: create-ad4m-app
+    description: Starter toolkit for building AD4M apps (Vite + TS + AD4M client).
+    docs_url: https://github.com/coasys/create-ad4m-app
+    default_template: solid
+    capabilities: [perspectives, languages, agents]
+    templates:
+      solid: { framework: solidjs, description: "Default — Solid + Tailwind v4 + Vite 8.", default: true }
+      react: { framework: react, description: "React 19 demo." }
+      vue: { framework: vue, description: "Vue 3 demo." }
+      r3f: { framework: react-three-fiber, description: "React Three Fiber; AD4M state drives a 3D scene." }
+
+# ---------------------------------------------------------------------------
 # Launcher seeds — the WE "design" layer. Each seed compiles to a real
 # we-seed.json via `coasys weave seed <name>`.
 # ---------------------------------------------------------------------------
@@ -188,6 +207,23 @@ repos:
         check: [pnpm run publish:dry-run]
         environment: production
         needs: [ad4m, we]
+
+  create-ad4m-app:
+    tier: core
+    target: true
+    priority: 60
+    description: Starter toolkit + templates — the AD4M developer on-ramp.
+    stack: [typescript]
+    playbooks:
+      setup: { run: [pnpm install], check: [test -f package.json] }
+      validate: { run: [pnpm run test:scaffold], check: [test -f package.json], automatic: false }
+      build: { run: [pnpm run build:cli], check: [test -f package.json] }
+      start: { run: [pnpm run dev:cli], check: [test -f package.json] }
+      deploy:
+        run: [pnpm --filter create-ad4m-app publish --access public]
+        check: [pnpm --filter create-ad4m-app pack --dry-run]
+        environment: production
+        env: [NPM_TOKEN]
 
   ad4m-devtools:
     tier: core

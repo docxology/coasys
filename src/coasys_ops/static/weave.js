@@ -16,6 +16,7 @@ const weaveState = {
   edited: null,
   targets: [],
   issues: [],
+  hash: null,
   tab: "graph",
   topo: {
     layout: "waves",
@@ -69,6 +70,7 @@ async function loadWeave() {
   weaveState.edited = clone(docPayload.document);
   weaveState.issues = docPayload.issues || [];
   weaveState.targets = docPayload.targets || [];
+  weaveState.hash = docPayload.hash || null;
   weaveState.graph = graph;
   weaveState.loaded = true;
   weaveState.topo.built = false;
@@ -83,12 +85,14 @@ function renderWeaveTab() {
   wq("#weave-graph").classList.toggle("active", tab === "graph");
   wq("#weave-schema").classList.toggle("active", tab === "schema");
   wq("#weave-deploy").classList.toggle("active", tab === "deploy");
+  wq("#weave-onboard").classList.toggle("active", tab === "onboard");
   document.querySelectorAll(".weave-tab").forEach((node) => {
     node.classList.toggle("active", node.dataset.weaveTab === tab);
   });
   if (tab === "graph") renderTopology();
   else if (tab === "schema") renderSchema();
-  else renderDeploy();
+  else if (tab === "deploy") renderDeploy();
+  else renderOnboard();
 }
 
 function renderIssues(issues) {
@@ -502,13 +506,19 @@ async function saveDocument() {
   setSaveStatus("saving…", "saving");
   let result;
   try {
+    const headers = { "Content-Type": "application/json" };
+    if (weaveState.hash) headers["X-Weave-Base-Hash"] = weaveState.hash;
     result = await getJson("/api/weave/document", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(weaveState.edited),
     });
   } catch (error) {
     setSaveStatus("save failed: " + error.message, "error");
+    return;
+  }
+  if (result.conflict) {
+    setSaveStatus("conflict — file changed on disk; reload to merge", "error");
     return;
   }
   if (result.parse_error) {
@@ -520,6 +530,7 @@ async function saveDocument() {
   if (result.saved) {
     weaveState.document = clone(weaveState.edited);
     weaveState.issues = result.issues;
+    weaveState.hash = result.hash || weaveState.hash;
     const time = new Date().toLocaleTimeString();
     setSaveStatus(`saved ✓ ${time}`, "saved");
     try {
@@ -699,6 +710,115 @@ async function renderDeploy() {
 }
 
 // --------------------------------------------------------------------------
+// Onboard view (scaffolding — the developer on-ramp)
+// --------------------------------------------------------------------------
+
+let startersCache = null;
+
+async function renderOnboard() {
+  if (!startersCache) {
+    startersCache = (await getJson("/api/weave/starters")).starters || {};
+  }
+  const starters = startersCache;
+  const keys = Object.keys(starters);
+  wq("#weave-starters").innerHTML = keys.length
+    ? `<h3>Starters</h3>` +
+      keys
+        .map((k) => {
+          const s = starters[k];
+          const tpls = Object.entries(s.templates || {})
+            .map(
+              ([tn, t]) =>
+                `<span class="pill ${t.default ? "configured" : ""}">${tn}<span class="muted"> · ${t.framework || ""}</span></span>`,
+            )
+            .join(" ");
+          return `<div class="weave-card">
+            <div class="weave-card-head"><strong>${k}</strong>
+              ${s.docs_url ? `<a class="button-link" href="${s.docs_url}" target="_blank" rel="noreferrer">repo</a>` : ""}</div>
+            <p class="muted">${s.description || ""}</p>
+            <p><code>${s.command}</code></p>
+            <div>${tpls}</div>
+          </div>`;
+        })
+        .join("")
+    : '<p class="muted">No starters defined in this document.</p>';
+
+  const starterSel = wq("#onboard-starter");
+  starterSel.innerHTML = keys.map((k) => `<option value="${k}">${k}</option>`).join("");
+  fillTemplateOptions();
+}
+
+function fillTemplateOptions() {
+  const starter = startersCache[wq("#onboard-starter").value];
+  const tsel = wq("#onboard-template");
+  if (!starter) {
+    tsel.innerHTML = "";
+    return;
+  }
+  const entries = Object.entries(starter.templates || {});
+  tsel.innerHTML = entries
+    .map(([tn]) => `<option value="${tn}" ${tn === starter.default_template ? "selected" : ""}>${tn}</option>`)
+    .join("");
+}
+
+async function createApp() {
+  const name = wq("#onboard-name").value.trim();
+  const statusEl = wq("#onboard-status");
+  if (!name) {
+    statusEl.textContent = "enter an app name";
+    statusEl.className = "weave-save-status error";
+    return;
+  }
+  statusEl.textContent = "creating…";
+  statusEl.className = "weave-save-status saving";
+  let result;
+  try {
+    result = await getJson("/api/weave/create-app", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        starter: wq("#onboard-starter").value,
+        template: wq("#onboard-template").value,
+      }),
+    });
+  } catch (error) {
+    statusEl.textContent = "failed: " + error.message;
+    statusEl.className = "weave-save-status error";
+    return;
+  }
+  if (result.saved) {
+    statusEl.textContent = `registered ${result.repo} ✓`;
+    statusEl.className = "weave-save-status saved";
+    wq("#onboard-result").innerHTML = `
+      <div class="weave-card">
+        <p><strong>Next:</strong> run this to scaffold the project files:</p>
+        <pre>${result.command}</pre>
+        <p class="muted">Registered into <code>coasys.weave.yml</code> — open the Topology tab to see <strong>${result.repo}</strong> in the graph.</p>
+      </div>`;
+    renderIssues(result.issues);
+    // Refresh model so topology/schema reflect the new app.
+    try {
+      const docPayload = await getJson("/api/weave/document");
+      weaveState.document = docPayload.document;
+      weaveState.edited = clone(docPayload.document);
+      weaveState.targets = docPayload.targets || [];
+      weaveState.hash = docPayload.hash || null;
+      weaveState.graph = await getJson("/api/weave/graph");
+      weaveState.topo.built = false;
+      weaveState.topo.pos = {};
+      populateTierFilter();
+    } catch (_) {
+      /* non-fatal */
+    }
+  } else {
+    statusEl.textContent = "not created — " + (result.detail || "validation failed");
+    statusEl.className = "weave-save-status error";
+    renderIssues(result.issues || []);
+  }
+}
+
+// --------------------------------------------------------------------------
 // Theme
 // --------------------------------------------------------------------------
 
@@ -777,6 +897,8 @@ wq("#weave-validate").addEventListener("click", () => validateEdits());
 wq("#weave-download").addEventListener("click", () => downloadJson());
 wq("#weave-save").addEventListener("click", () => saveDocument());
 wq("#weave-deploy-env").addEventListener("change", () => renderDeploy());
+wq("#onboard-starter").addEventListener("change", () => fillTemplateOptions());
+wq("#onboard-create").addEventListener("click", () => createApp());
 wq("#we-theme-select").addEventListener("change", (e) => applyTheme(e.target.value));
 
 initTheme();

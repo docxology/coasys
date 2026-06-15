@@ -433,3 +433,12 @@ pre {
 .topo-node.tier-dim { opacity: 0.18; }
 
 .weave-leg .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+/* ===================== Onboard (scaffolding) ===================== */
+#weave-starters { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-bottom: 18px; }
+#weave-starters code, .weave-onboard-form code { background: rgba(0,0,0,0.05); padding: 1px 6px; border-radius: 5px; }
+.weave-onboard-form { background: var(--panel); border: 1px solid var(--line); border-radius: var(--we-border-radius-lg, 12px); padding: 16px; max-width: 720px; }
+.weave-onboard-form h3 { margin: 0 0 10px; }
+.weave-onboard-form .weave-fields { grid-template-columns: 1fr 1fr 1fr; }
+.weave-onboard-form pre { background: rgba(0,0,0,0.05); padding: 10px 12px; border-radius: 8px; overflow-x: auto; }
+#onboard-result { margin-top: 12px; }

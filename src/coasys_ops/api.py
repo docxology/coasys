@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import Body, FastAPI, HTTPException
+from fastapi import Body, FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 
@@ -14,8 +14,10 @@ from .weave.export import operation_plan as weave_operation_plan
 from .weave.graph import build_graph as weave_build_graph
 from .weave.graph import to_mermaid as weave_to_mermaid
 from .weave.loader import document_to_mapping, load_document, parse_document
+from .weave.scaffold import register_app as weave_register_app
 from .weave.seed import render_seed as weave_render_seed
 from .weave.validate import validate_document as weave_validate
+from .weave.writer import current_file_hash as weave_current_hash
 from .weave.writer import save_document as weave_save_document
 
 STATIC_DIR = Path(__file__).parent / "static"
@@ -128,12 +130,25 @@ def create_app(root: Path | None = None) -> FastAPI:
             "document": document_to_mapping(document),
             "issues": [issue.to_dict() for issue in issues],
             "targets": document.targets(),
+            "hash": weave_current_hash(weave_root),
         }
 
     @app.post("/api/weave/document")
-    def weave_save(payload: Annotated[dict, Body()] = None) -> dict[str, object]:
-        """Validate-gated save-back. Writes only when there are no errors."""
+    def weave_save(
+        payload: Annotated[dict, Body()] = None,
+        base_hash: Annotated[str | None, Header(alias="X-Weave-Base-Hash")] = None,
+    ) -> dict[str, object]:
+        """Validate-gated save-back. Writes only when there are no errors.
+
+        Optimistic concurrency: when the client sends the hash it loaded, refuse
+        the save if the file changed on disk underneath it (e.g. a hand edit).
+        """
         payload = payload or {}
+        if base_hash is not None:
+            current = weave_current_hash(weave_root)
+            if current is not None and current != base_hash:
+                return {"ok": False, "saved": False, "conflict": True,
+                        "current_hash": current, "issues": []}
         try:
             document = parse_document(payload)
         except Exception as exc:  # noqa: BLE001 - surface parse errors to the editor
@@ -143,7 +158,49 @@ def create_app(root: Path | None = None) -> FastAPI:
         if any(i.level == "error" for i in issues):
             return {"ok": False, "saved": False, "issues": issue_dicts}
         path = weave_save_document(document, root=weave_root)
-        return {"ok": True, "saved": True, "issues": issue_dicts, "path": str(path)}
+        return {"ok": True, "saved": True, "issues": issue_dicts, "path": str(path),
+                "hash": weave_current_hash(weave_root)}
+
+    @app.get("/api/weave/starters")
+    def weave_starters() -> dict[str, object]:
+        document = load_document(weave_root)
+        return {
+            "starters": {k: v.model_dump(exclude_none=True) for k, v in document.starters.items()},
+        }
+
+    @app.post("/api/weave/create-app")
+    def weave_create_app(payload: Annotated[dict, Body()] = None) -> dict[str, object]:
+        """Scaffold + register a new AD4M app (validate-gated save)."""
+        payload = payload or {}
+        name = (payload.get("name") or "").strip()
+        if not name:
+            raise HTTPException(status_code=400, detail="missing 'name'")
+        document = load_document(weave_root)
+        try:
+            new_doc, command = weave_register_app(
+                document,
+                name,
+                starter_key=payload.get("starter", "ad4m"),
+                template=payload.get("template"),
+                route=payload.get("route"),
+                port=payload.get("port"),
+            )
+        except (KeyError, ValueError) as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        issues = weave_validate(new_doc)
+        issue_dicts = [i.to_dict() for i in issues]
+        if any(i.level == "error" for i in issues):
+            return {"ok": False, "saved": False, "command": command, "issues": issue_dicts}
+        path = weave_save_document(new_doc, root=weave_root)
+        return {
+            "ok": True,
+            "saved": True,
+            "command": command,
+            "repo": name,
+            "issues": issue_dicts,
+            "path": str(path),
+            "hash": weave_current_hash(weave_root),
+        }
 
     @app.get("/api/weave/schema")
     def weave_schema() -> dict[str, object]:

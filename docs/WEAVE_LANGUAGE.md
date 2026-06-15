@@ -250,6 +250,45 @@ compilation.
 
 ---
 
+## 4b. Starters & scaffolding (developer on-ramp)
+
+To drive ecosystem adoption, Weave models the
+[`create-ad4m-app`](https://github.com/coasys/create-ad4m-app) starter toolkit as
+a first-class concept. A `starters:` section registers scaffolding toolkits:
+
+```yaml
+starters:
+  ad4m:
+    command: npx create-ad4m-app
+    repo: create-ad4m-app          # the source repo in the fleet
+    default_template: solid
+    capabilities: [perspectives, languages, agents]
+    templates:
+      solid: { framework: solidjs, default: true }
+      react: { framework: react }
+      vue:   { framework: vue }
+      r3f:   { framework: react-three-fiber }
+```
+
+`coasys weave create-app my-notes --template react --register` (or the dashboard
+**Onboard** tab, or `POST /api/weave/create-app`) does two things:
+
+1. Prints the exact scaffold command (`npx create-ad4m-app my-notes --template react`).
+2. With `--register`, adds `my-notes` to the document as a full fleet member — a
+   WE app binding (auto-assigned dev-server port, `/my-notes` route), the
+   `setup → validate → build → start` lifecycle, a `needs: [ad4m]` edge, and
+   `scaffold:` provenance — then validates and atomically saves. The new app
+   appears immediately in the topology, plans, and (if added to a seed) launchers.
+
+`--run` additionally executes the `npx` command. Scaffolded repos carry their
+origin:
+
+```yaml
+repos:
+  my-notes:
+    scaffold: { starter: ad4m, template: react }
+```
+
 ## 5. CLI reference
 
 ```bash
@@ -258,6 +297,8 @@ coasys weave targets [--path P]           # priority targets, most important fir
 coasys weave graph -f json|mermaid|dot    # the visual backbone, as data
 coasys weave plan build|deploy [--path P] # ordered, wave-by-wave execution plan
 coasys weave deploy-check [-e env] [--strict] # deployment readiness + rollout
+coasys weave starters                     # list scaffolding starters + templates
+coasys weave create-app <name> [-t solid] [--register] [--run]  # scaffold an AD4M app
 coasys weave seed <name> [-o we-seed.json]# compile a launcher seed
 coasys weave export-yml [-o coasys.yml]   # compile down to legacy ops config
 coasys weave fmt [--check]                # rewrite (or check) canonical form
@@ -274,6 +315,8 @@ coasys weave schema [-o schema.json]      # JSON Schema (drives the forms)
 | `GET  /api/weave/plan?profile=`     | ordered execution plan                             |
 | `GET  /api/weave/seed/{name}`       | compiled `we-seed.json`                            |
 | `GET  /api/weave/deploy-check?environment=` | deployment-readiness report                  |
+| `GET  /api/weave/starters`          | scaffolding starters + templates                   |
+| `POST /api/weave/create-app`        | scaffold + register an app (gated save)            |
 | `GET  /api/weave/schema`            | JSON Schema for a document                         |
 | `POST /api/weave/validate`          | `{ok, issues}` for a posted document               |
 | `POST /api/weave/document`          | **validate-gated save**: `{ok, saved, issues, path}` |

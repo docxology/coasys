@@ -133,3 +133,74 @@ repos:
 
     assert response.status_code == 200
     assert response.json()["run"]["status"] == "dry_run_passed"
+
+
+def _seed_weave(tmp_path: Path) -> Path:
+    example = Path(__file__).resolve().parents[1] / "examples" / "coasys.weave.yml"
+    target = tmp_path / "coasys.weave.yml"
+    target.write_text(example.read_text())
+    return target
+
+
+def test_weave_onboard_create_app_registers_and_persists(tmp_path: Path) -> None:
+    """Backend the dashboard Onboard tab drives: scaffold + register + save."""
+    weave_file = _seed_weave(tmp_path)
+    client = TestClient(create_app(tmp_path))
+
+    # Onboard tab loads starters to populate the form.
+    starters = client.get("/api/weave/starters").json()["starters"]
+    assert "ad4m" in starters
+
+    before = client.get("/api/weave/document").json()
+    assert "demo-notes" not in before["document"]["repos"]
+
+    created = client.post(
+        "/api/weave/create-app",
+        json={"name": "demo-notes", "template": "react"},
+    )
+    assert created.status_code == 200
+    body = created.json()
+    assert body["ok"] is True and body["saved"] is True
+    assert body["command"] == "npx create-ad4m-app demo-notes --template react"
+    assert body["repo"] == "demo-notes"
+
+    # Persisted to disk and visible on the next document load.
+    assert "demo-notes" in weave_file.read_text()
+    after = client.get("/api/weave/document").json()
+    assert "demo-notes" in after["document"]["repos"]
+
+
+def test_weave_onboard_create_app_requires_name(tmp_path: Path) -> None:
+    _seed_weave(tmp_path)
+    client = TestClient(create_app(tmp_path))
+    assert client.post("/api/weave/create-app", json={"name": "  "}).status_code == 400
+
+
+def test_weave_save_rejects_stale_base_hash(tmp_path: Path) -> None:
+    """Optimistic concurrency: a save built on an out-of-date file is refused."""
+    weave_file = _seed_weave(tmp_path)
+    client = TestClient(create_app(tmp_path))
+
+    payload = client.get("/api/weave/document").json()
+    document = payload["document"]
+    stale_hash = payload["hash"]
+    assert stale_hash  # GET exposes the on-disk hash
+
+    # Someone edits the file on disk after the dashboard loaded it.
+    weave_file.write_text(weave_file.read_text() + "\n# hand edit\n")
+
+    conflicted = client.post(
+        "/api/weave/document",
+        json=document,
+        headers={"X-Weave-Base-Hash": stale_hash},
+    ).json()
+    assert conflicted["saved"] is False and conflicted["conflict"] is True
+
+    # Re-fetching gives the current hash; the same save then succeeds.
+    fresh = client.get("/api/weave/document").json()
+    ok = client.post(
+        "/api/weave/document",
+        json=fresh["document"],
+        headers={"X-Weave-Base-Hash": fresh["hash"]},
+    ).json()
+    assert ok["saved"] is True and ok["hash"]

@@ -6,6 +6,16 @@ The project clones and updates Coasys repositories, records freshness and CI
 metadata, detects local validation/build/start/deploy commands, and serves a
 local dashboard for navigating the ecosystem.
 
+## Screenshots
+
+| Dashboard | Weave · Topology |
+|-----------|------------------|
+| ![Dashboard overview](docs/images/dashboard.png) | ![Weave dependency graph](docs/images/weave-graph.png) |
+
+| Weave · Onboard (scaffold + register an AD4M app) | Weave · Deploy readiness |
+|----------------------------------------------------|--------------------------|
+| ![Weave onboard tab](docs/images/weave-onboard.png) | ![Weave deploy gates](docs/images/weave-deploy.png) |
+
 ## Documentation
 
 The documentation is split by operator task and maintainer concern:
@@ -52,6 +62,8 @@ deploy gates. See [docs/WEAVE_LANGUAGE.md](docs/WEAVE_LANGUAGE.md) and
 uv run coasys weave lint            # validate structure + semantics
 uv run coasys weave targets         # priority targets, most important first
 uv run coasys weave graph -f mermaid# the visual backbone as data
+uv run coasys weave starters        # list AD4M app starters + templates
+uv run coasys weave create-app notes --template solid --register  # scaffold + register a new AD4M app
 uv run coasys weave plan setup      # dependency-ordered bootstrap waves
 uv run coasys weave plan deploy     # ordered, wave-by-wave rollout plan
 uv run coasys weave deploy-check    # deployment readiness + gates
@@ -62,6 +74,9 @@ uv run coasys weave fmt             # rewrite canonically (validate-gated)
 
 The dashboard **Weave** tab's Schema view **auto-saves** edits back to
 `coasys.weave.yml` (validate-gated and atomic) via `POST /api/weave/document`.
+Saves carry the hash of the file they were loaded from (`X-Weave-Base-Hash`);
+if the file changed on disk underneath (e.g. a hand edit), the save is refused
+as a conflict instead of clobbering the external change.
 
 For release-readiness handoff, run the dry-run gate:
 
@@ -186,6 +201,11 @@ Secrets should not be stored in this repository. Use normal GitHub auth,
 - `POST /api/operate?execute_configured=true`
 - `GET /api/runs`
 - `GET /api/runs/{id}`
+- `GET /api/weave/document` · `POST /api/weave/document` (validate-gated save;
+  honours `X-Weave-Base-Hash` for optimistic concurrency)
+- `GET /api/weave/starters` — AD4M app starters + templates for the Onboard tab
+- `POST /api/weave/create-app` — scaffold + register a new AD4M app
+- `GET /api/weave/{schema,graph,graph.mmd,plan/{profile},deploy-check,seed/{name}}`
 
 ## Verification
 

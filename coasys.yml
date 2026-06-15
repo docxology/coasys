@@ -11,6 +11,22 @@ defaults:
   partial_clone: true
   execute_detected_validation: false
 
+# Starters — developer on-ramp for `coasys weave create-app` and the dashboard
+# Onboard tab. Scaffolds a new AD4M app from create-ad4m-app and registers it.
+starters:
+  ad4m:
+    command: npx create-ad4m-app
+    repo: create-ad4m-app
+    description: Starter toolkit for building AD4M apps (Vite + TS + AD4M client).
+    docs_url: https://github.com/coasys/create-ad4m-app
+    default_template: solid
+    capabilities: [perspectives, languages, agents]
+    templates:
+      solid: { framework: solidjs, description: "Default — Solid + Tailwind v4 + Vite 8.", default: true }
+      react: { framework: react, description: "React 19 demo." }
+      vue: { framework: vue, description: "Vue 3 demo." }
+      r3f: { framework: react-three-fiber, description: "React Three Fiber; AD4M state drives a 3D scene." }
+
 repos:
   ad4m:
     tier: core
@@ -52,6 +68,32 @@ repos:
           - pnpm run dev:web
         dry_run_commands:
           - test -f package.json
+  create-ad4m-app:
+    tier: core
+    playbooks:
+      validate:
+        commands:
+          - pnpm run test:scaffold
+        dry_run_commands:
+          - test -f package.json
+        automatic: false
+      build:
+        commands:
+          - pnpm run build:cli
+        dry_run_commands:
+          - test -f package.json
+      start:
+        commands:
+          - pnpm run dev:cli
+        dry_run_commands:
+          - test -f package.json
+      deploy:
+        commands:
+          - pnpm --filter create-ad4m-app publish --access public
+        dry_run_commands:
+          - pnpm --filter create-ad4m-app pack --dry-run
+        env_required:
+          - NPM_TOKEN
   perspect3ve:
     tier: core
     playbooks:

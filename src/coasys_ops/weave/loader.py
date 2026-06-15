@@ -129,7 +129,7 @@ def _from_legacy(payload: dict[str, Any]) -> dict[str, Any]:
     if payload.get("workspace"):
         native["workspace"] = payload["workspace"]
     # Pass through native-only sections if present in a hybrid file.
-    for key in ("environments", "seeds"):
+    for key in ("environments", "seeds", "starters"):
         if key in payload:
             native[key] = payload[key]
     return native
