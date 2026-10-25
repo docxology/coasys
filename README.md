@@ -61,7 +61,7 @@ deploy gates. See [docs/WEAVE_LANGUAGE.md](docs/WEAVE_LANGUAGE.md) and
 ```bash
 uv run coasys weave lint            # validate structure + semantics
 uv run coasys weave targets         # priority targets, most important first
-uv run coasys weave graph -f mermaid# the visual backbone as data
+uv run coasys weave graph -f mermaid  # the visual backbone as data
 uv run coasys weave starters        # list AD4M app starters + templates
 uv run coasys weave create-app notes --template solid --register  # scaffold + register a new AD4M app
 uv run coasys weave plan setup      # dependency-ordered bootstrap waves

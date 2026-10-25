@@ -175,9 +175,3 @@ def load_document(root: Path | None = None) -> WeaveDocument:
 def document_to_mapping(document: WeaveDocument) -> dict[str, Any]:
     """Serialise a document back to a plain mapping (drops null/empty fields)."""
     return document.model_dump(exclude_none=True, exclude_defaults=False)
-
-
-def document_to_yaml(document: WeaveDocument) -> str:
-    return yaml.safe_dump(
-        document_to_mapping(document), sort_keys=False, default_flow_style=False
-    )

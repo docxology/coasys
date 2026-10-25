@@ -138,6 +138,7 @@ The current release config contains explicit playbooks for:
 
 - `ad4m`
 - `we`
+- `create-ad4m-app`
 - `perspect3ve`
 - `flux`
 - `ad4m-host`

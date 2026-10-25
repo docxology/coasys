@@ -51,18 +51,18 @@ Stop the dashboard with Ctrl-C.
 `uv run coasys status` should report:
 
 ```text
-repositories: 98
-cloned: 98
+repositories: 99
+cloned: 99
 dirty: 0
 behind: 0
 ```
 
 The report should show:
 
-- 11 configured repositories;
+- 12 configured repositories;
 - 84 detected-only repositories;
 - 3 unconfigured repositories;
-- 94 passed validations;
+- 95 passed validations;
 - 4 validation warnings;
 - deploy readiness blocked except detected/configured readiness gates.
 

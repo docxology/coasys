@@ -34,15 +34,15 @@ Representative fields:
 
 ```json
 {
-  "repo_count": 98,
-  "cloned_count": 98,
+  "repo_count": 99,
+  "cloned_count": 99,
   "dirty_count": 0,
   "behind_count": 0,
   "command_count": 328,
-  "tiers": {"core": 7},
-  "statuses": {"passed": 94, "warn": 4},
-  "config_statuses": {"configured": 11, "detected": 84, "unconfigured": 3},
-  "deploy_statuses": {"deploy_blocked": 94, "detected": 4}
+  "tiers": {"core": 8},
+  "statuses": {"passed": 95, "warn": 4},
+  "config_statuses": {"configured": 12, "detected": 84, "unconfigured": 3},
+  "deploy_statuses": {"deploy_blocked": 95, "detected": 4}
 }
 ```
 
@@ -56,7 +56,7 @@ Response shape:
 
 ```json
 {
-  "count": 98,
+  "count": 99,
   "repos": [
     {
       "name": "ad4m",

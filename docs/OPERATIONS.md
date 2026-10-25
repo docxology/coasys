@@ -81,8 +81,8 @@ uv run coasys report --output workspace/state/REPORT.md
 
 Expected current fleet state:
 
-- 98 repositories
-- 98 cloned locally
+- 99 repositories
+- 99 cloned locally
 - 0 dirty checkouts
 - 0 behind remote
-- 94 passed validations and 4 warnings
+- 95 passed validations and 4 warnings

@@ -56,8 +56,8 @@ stored in tracked files.
 
 The current handoff state is a public `github.com/coasys` fleet sync:
 
-- 98 repositories discovered and cloned locally.
-- 11 repositories have explicit configured playbooks.
+- 99 repositories discovered and cloned locally.
+- 12 repositories have explicit configured playbooks.
 - 84 repositories have detected-only commands.
 - 3 repositories are unconfigured because no runnable stack was detected.
 - Deployment remains blocked by default unless a repo has an explicit deploy

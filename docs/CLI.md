@@ -28,6 +28,7 @@ limits and to read workflow metadata consistently.
 | `status` | Print compact fleet counts. | Yes |
 | `report` | Print or write Markdown operating report. | Yes |
 | `serve` | Serve dashboard locally. | Local dashboard only |
+| `weave` | Inspect, plan, seed, and edit the Weave fleet document. | Read-only except `fmt` and `create-app` |
 
 ## `sync`
 
@@ -113,8 +114,8 @@ uv run coasys status
 
 The expected release-readiness state is:
 
-- `repositories: 98`
-- `cloned: 98`
+- `repositories: 99`
+- `cloned: 99`
 - `dirty: 0`
 - `behind: 0`
 

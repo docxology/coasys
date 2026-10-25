@@ -8,7 +8,7 @@
 - `coasys.yml` — fleet configuration: `org: coasys`, workspace repo and
   state directories (`workspace/repos`, `workspace/state`), default
   timeouts.
-- `docs/` — 13 topic files (API, ARCHITECTURE, CLI, CONFIGURATION,
+- `docs/` — 14 topic files (API, ARCHITECTURE, CLI, CONFIGURATION,
   DASHBOARD, OPERATIONS, PLAYBOOKS, README, RELEASE_CHECKLIST, plus
   others) with an `images/` subfolder.
 
