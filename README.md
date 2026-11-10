@@ -220,3 +220,7 @@ uv run coasys report --output workspace/state/REPORT.md
 
 Operational handoff notes live in `docs/OPERATIONS.md`. GitHub Actions also
 runs the lint and test gate on pushes and pull requests.
+
+## License
+
+Released under the [MIT License](LICENSE).
