@@ -19,7 +19,7 @@ build: the dashboard is plain static HTML/CSS/JS under `src/coasys_ops/static/`.
 ## Commands
 
 ```bash
-uv sync --extra dev                 # install editable, with dev deps
+uv sync --locked --extra dev                 # install editable, with dev deps
 uv run ruff check .                 # lint (line length 100; rules E,F,I,UP,B)
 uv run pytest -q                    # tests
 uv run coasys serve --port 5050     # dashboard on http://127.0.0.1:5050
@@ -57,12 +57,10 @@ scripts.
 
 ## Verification
 
-Run `scripts/verify_release.sh` before claiming a change is ready — it is the
-documented gate. For narrower work, `uv run ruff check .` and `uv run pytest -q`
+Use `scripts/verify_release.sh` for the
+[populated handoff workspace](docs/RELEASE_CHECKLIST.md). On a clean checkout, `uv run ruff check .` and `uv run pytest -q`
 are the two checks CI runs. Report the command and its result.
 
 ## Relationship to `CLAUDE.md`
 
-A vendor-specific `CLAUDE.md` still exists in this repository and duplicates part
-of this file. This `AGENTS.md` is the canonical entry point; `CLAUDE.md` is
-slated for removal as part of the repository's tooling-neutrality pass.
+`CLAUDE.md` points to this file so both entry points share the same guidance.

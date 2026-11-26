@@ -46,25 +46,18 @@ curl -fsS http://127.0.0.1:5050/api/report
 
 Stop the dashboard with Ctrl-C.
 
-## Expected Current State
+## Handoff workspace prerequisite
 
-`uv run coasys status` should report:
+The script expects the fleet totals in the
+[recorded handoff snapshot](archive/HANDOFF_SNAPSHOT.md). It reads the
+existing SQLite inventory and asserts the clone and freshness counts.
+Use the static checks on a fresh checkout:
 
-```text
-repositories: 99
-cloned: 99
-dirty: 0
-behind: 0
+```sh
+uv sync --locked --extra dev
+uv run --no-sync ruff check .
+uv run --no-sync pytest -q
 ```
-
-The report should show:
-
-- 12 configured repositories;
-- 84 detected-only repositories;
-- 3 unconfigured repositories;
-- 95 passed validations;
-- 4 validation warnings;
-- deploy readiness blocked except detected/configured readiness gates.
 
 ## Handoff Rules
 

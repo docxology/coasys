@@ -316,7 +316,7 @@ coasys weave schema [-o schema.json]      # JSON Schema (drives the forms)
 | `GET  /api/weave/seed/{name}`       | compiled `we-seed.json`                            |
 | `GET  /api/weave/deploy-check?environment=` | deployment-readiness report                  |
 | `GET  /api/weave/starters`          | scaffolding starters + templates                   |
-| `POST /api/weave/create-app`        | scaffold + register an app (gated save)            |
+| `POST /api/weave/create-app`        | register an app and return its scaffold command            |
 | `GET  /api/weave/schema`            | JSON Schema for a document                         |
 | `POST /api/weave/validate`          | `{ok, issues}` for a posted document               |
 | `POST /api/weave/document`          | **validate-gated save**: `{ok, saved, issues, path}` |

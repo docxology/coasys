@@ -1,0 +1,11 @@
+{
+  "fig:weave-topology": {
+    "label": "fig:weave-topology",
+    "filename": "weave-graph.png",
+    "caption": "Coasys Weave topology and repository dependencies.",
+    "generated_by": "docs/images/weave-graph.png",
+    "metadata": {
+      "alt_text": "Tier-colored repository nodes are connected by dependency edges in the Coasys Weave topology."
+    }
+  }
+}

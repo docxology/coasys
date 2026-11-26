@@ -1,0 +1,20 @@
+paper:
+  title: "Coasys Ops and Weave"
+  subtitle: "A local repository operations dashboard and dependency model"
+  version: "0.1.0"
+authors:
+  - name: Daniel Ari Friedman
+    orcid: "0000-0001-6232-9096"
+publication:
+  github_repository: docxology/coasys
+  repository_url: https://github.com/docxology/coasys
+metadata:
+  license: MIT
+  language: en
+render:
+  formats:
+    pdf: true
+    html: true
+    slides: false
+    docx: false
+    epub: false

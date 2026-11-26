@@ -1,6 +1,6 @@
 # Coasys Ops — TODO / Scope
 
-Top-level scope tracker for the operations dashboard. Done items are kept as a
+Scope tracker for the operations dashboard. Done items are kept as a
 record of what shipped; open items are the live backlog.
 
 ## Shipped

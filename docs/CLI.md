@@ -9,7 +9,7 @@ uv run coasys --help
 ## Setup
 
 ```bash
-uv sync --extra dev
+uv sync --locked --extra dev
 uv run coasys sync --org coasys
 uv run coasys status
 ```
