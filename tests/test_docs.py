@@ -8,7 +8,7 @@ LOCAL_LINK_PATTERN = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 
 
 def _markdown_files() -> list[Path]:
-    return sorted([ROOT / "README.md", *(ROOT / "docs").glob("*.md")])
+    return sorted([ROOT / "README.md", ROOT / "AGENTS.md", *(ROOT / "docs").rglob("*.md")])
 
 
 def test_markdown_local_links_resolve() -> None:
@@ -20,6 +20,9 @@ def test_markdown_local_links_resolve() -> None:
             if not target or "://" in target or target.startswith(("mailto:", "tel:")):
                 continue
             target_path = (path.parent / target).resolve()
+            if target_path.parent == ROOT / "output" / "figures":
+                # The render copies its prerequisite from the authored screenshot tree.
+                target_path = ROOT / "docs" / "images" / target_path.name
             if not target_path.exists():
                 missing.append(f"{path.relative_to(ROOT)} -> {raw_target}")
 
@@ -28,18 +31,21 @@ def test_markdown_local_links_resolve() -> None:
 
 def test_readme_links_to_modular_documentation() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "docs/README.md" in readme
+    index = (ROOT / "docs" / "README.md").read_text(encoding="utf-8")
     for target in [
-        "docs/README.md",
-        "docs/ARCHITECTURE.md",
-        "docs/CLI.md",
-        "docs/API.md",
-        "docs/CONFIGURATION.md",
-        "docs/PLAYBOOKS.md",
-        "docs/STATE_AND_REPORTING.md",
-        "docs/DASHBOARD.md",
-        "docs/OPERATIONS.md",
-        "docs/RELEASE_CHECKLIST.md",
-        "docs/TROUBLESHOOTING.md",
+        "ARCHITECTURE.md",
+        "CLI.md",
+        "API.md",
+        "CONFIGURATION.md",
+        "PLAYBOOKS.md",
+        "STATE_AND_REPORTING.md",
+        "DASHBOARD.md",
+        "OPERATIONS.md",
+        "RELEASE_CHECKLIST.md",
+        "TROUBLESHOOTING.md",
+        "manuscript/README.md",
+        "MANUSCRIPT_RENDER.md",
     ]:
-        assert target in readme
+        assert target in index
 

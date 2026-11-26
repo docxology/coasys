@@ -21,8 +21,7 @@ nodes, priority targets, validity check):
 
 ![Weave dependency graph](images/weave-graph.png)
 
-**Onboard** — scaffold and register a new AD4M app from `create-ad4m-app`; it
-appears instantly in the topology, plans, and seeds:
+**Onboard** — register a new AD4M app and inspect the proposed scaffold command:
 
 ![Weave onboard tab](images/weave-onboard.png)
 
@@ -52,21 +51,23 @@ The project is intentionally local-first. Generated clones, logs, SQLite state,
 and reports live under `workspace/`, which is ignored by git. Secrets are never
 stored in tracked files.
 
-## Current Fleet Contract
+## Start locally
 
-The current handoff state is a public `github.com/coasys` fleet sync:
+From the checkout with Python 3.13 or later and uv:
 
-- 99 repositories discovered and cloned locally.
-- 12 repositories have explicit configured playbooks.
-- 84 repositories have detected-only commands.
-- 3 repositories are unconfigured because no runnable stack was detected.
-- Deployment remains blocked by default unless a repo has an explicit deploy
-  playbook, required environment, and a passing dry run.
-
-Regenerate the live numbers with:
-
-```bash
-uv run coasys status
-uv run coasys report --output workspace/state/REPORT.md
+```sh
+uv sync --locked --extra dev
+uv run --no-sync coasys status
+uv run --no-sync coasys serve --host 127.0.0.1 --port 5050
 ```
 
+An empty checkout has no fleet inventory yet. The [operations runbook](OPERATIONS.md)
+covers the explicit steps that populate and refresh it. See the
+[handoff snapshot](archive/HANDOFF_SNAPSHOT.md) for the recorded release
+workspace and the [release checklist](RELEASE_CHECKLIST.md) for its gate.
+
+## Maintainer references
+
+- [Software manuscript](manuscript/README.md) and [rendering instructions](MANUSCRIPT_RENDER.md)
+- [Backlog and shipped scope](BACKLOG.md)
+- [Agent guidance](AGENTS.md)

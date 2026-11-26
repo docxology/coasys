@@ -15,7 +15,7 @@ Related references:
 
 ## Release Verification
 
-Run the full local release gate:
+Run the full local release gate in the populated handoff workspace:
 
 ```bash
 scripts/verify_release.sh
@@ -79,10 +79,6 @@ uv run coasys status
 uv run coasys report --output workspace/state/REPORT.md
 ```
 
-Expected current fleet state:
-
-- 99 repositories
-- 99 cloned locally
-- 0 dirty checkouts
-- 0 behind remote
-- 95 passed validations and 4 warnings
+Compare the fresh report with the [recorded handoff snapshot](archive/HANDOFF_SNAPSHOT.md).
+The one-command gate asserts the recorded clone counts. Run native tests and
+lint alone when verifying a fresh checkout.
